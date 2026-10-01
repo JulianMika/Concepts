@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Konzept – KI-Automatisierung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#102033;
+    --muted:#3a5168;
+    --line:#9fd0de;
+    --paper:#eef7fb;
+    --card:#f7fcff;
+    --teal:#0097b2;
+    --mag:#e0126a;
+    --cyan:#00c2d8;
+    --head:"Chakra Petch", "Segoe UI", system-ui, sans-serif;
+    --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+    --ui:"Segoe UI", "Helvetica Neue", system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--paper);color:var(--ink)}
+  body{font-family:var(--head);-webkit-font-smoothing:antialiased;overflow:hidden}
+  body::before{
+    content:"";position:fixed;inset:-10%;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(880px 520px at 0% 0%, rgba(0,194,216,.22) 0%, transparent 62%),
+      radial-gradient(720px 480px at 100% 100%, rgba(224,18,106,.14) 0%, transparent 58%),
+      linear-gradient(165deg, #f4fcff, #e7f4f8 55%, #f8eef3);
+    animation:drift 28s ease-in-out infinite alternate;
+  }
+  body::after{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:
+      linear-gradient(rgba(0,151,178,.09) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,151,178,.09) 1px, transparent 1px),
+      linear-gradient(rgba(224,18,106,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(224,18,106,.05) 1px, transparent 1px);
+    background-size:48px 48px, 48px 48px, 144px 144px, 144px 144px;
+    animation:drift 36s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes drift{from{transform:translate3d(0,0,0)}to{transform:translate3d(-2.2%,-1.4%,0)}}
+  .hud{position:fixed;z-index:10;top:18px;left:18px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--teal);text-transform:uppercase;background:rgba(238,247,251,.92);padding:6px 10px;border:1px solid var(--line);clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+  .hud a{color:inherit;text-decoration:none}
+  .hud a:hover{color:var(--mag)}
+  .nav > button{
+    font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--ink);
+    background:var(--card);border:1px solid var(--teal);padding:7px 11px;cursor:pointer;border-radius:0;
+    clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+  }
+  .nav button:focus-visible,.dots button:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
+  .deck{height:100%;height:100svh;position:relative;z-index:1}
+  .slide{
+    position:absolute;inset:0;
+    display:grid;grid-template-columns:minmax(260px,420px) minmax(0,1fr);
+    align-items:center;gap:4vw;padding:12vh 6vw 14vh 7vw;
+    opacity:0;visibility:hidden;pointer-events:none;z-index:1;
+  }
+  .slide.on{opacity:1;visibility:visible;pointer-events:auto}
+  .slide.title{grid-template-columns:1fr;padding-left:12vw;overflow:hidden}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;color:var(--teal);text-transform:uppercase;margin-bottom:14px}
+  .kicker::before{content:"// ";color:var(--mag)}
+  h1{font-size:clamp(2.6rem,5.5vw,4.8rem);font-weight:700;line-height:1.02;max-width:12ch}
+  h2{font-size:clamp(1.7rem,3vw,2.5rem);font-weight:700;line-height:1.1;margin-bottom:12px;max-width:16ch}
+  h1 em,h2 em,.close em{font-style:normal;color:var(--mag);text-shadow:2px 0 0 rgba(0,194,216,.35)}
+  .deckline{margin-top:16px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .lead,.copy p{max-width:38em;font-size:clamp(1rem,1.25vw,1.12rem);font-weight:400;line-height:1.6;color:var(--muted)}
+  .lead{margin-top:22px}
+  .hint{margin-top:26px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--teal)}
+  .copy p b{color:var(--ink);font-weight:600}
+  .close{margin-top:18px;font-size:clamp(1.35rem,2.2vw,1.8rem);font-weight:700;line-height:1.2}
+  .copy{position:relative;z-index:1}
+  figure{min-width:0;position:relative;z-index:1}
+  figcaption{margin-top:14px;font-family:var(--mono);font-size:12px;line-height:1.45;color:var(--muted);max-width:42em}
+  .nav{position:fixed;z-index:20;left:50%;bottom:22px;transform:translateX(-50%);display:flex;align-items:center;gap:12px}
+  .nav > button{width:38px;height:38px;padding:0;font-size:18px}
+  .dots{display:flex;gap:8px}
+  .dots button{width:8px;height:8px;padding:0;border-radius:0;transform:rotate(45deg);border:1px solid var(--teal);background:transparent;cursor:pointer}
+  .dots button.on{background:var(--teal)}
+
+  .floaters{position:absolute;inset:0;pointer-events:none;z-index:0}
+  .floater{position:absolute;width:200px;animation:floaty 8s ease-in-out infinite alternate}
+  .floater:nth-child(1){right:10%;top:16%}
+  .floater:nth-child(2){right:22%;top:42%;animation-delay:-3s}
+  .floater:nth-child(3){right:8%;bottom:14%;animation-delay:-5s}
+  .floater .win{animation:none;box-shadow:0 14px 30px rgba(27,40,56,.08)}
+  @keyframes floaty{from{transform:translateY(0) rotate(-2deg)}to{transform:translateY(-18px) rotate(2deg)}}
+
+  .now{font-family:var(--mono);font-size:.95rem;line-height:1.4;color:var(--ink);min-height:2.8em;margin-bottom:12px;font-weight:500;border-left:3px solid var(--cyan);padding-left:10px}
+  .desk{position:relative;height:320px}
+  .placed{position:absolute;width:48%}
+  .placed.src{left:0;top:4%;transform:rotate(-2.5deg)}
+  .placed.dst{right:0;bottom:0;transform:rotate(2deg)}
+  .placed.arrived .win{border-color:#8ec5da}
+  .flyer{
+    position:absolute;z-index:8;left:8%;top:18%;opacity:0;pointer-events:none;
+    transition:left .85s cubic-bezier(.22,.7,.2,1), top .85s cubic-bezier(.22,.7,.2,1), opacity .35s;
+  }
+  .flyer.notrans{transition:none}
+  .flyer.at-mid{left:34%;top:0;opacity:1}
+  .flyer.at-dst{left:58%;top:62%;opacity:0}
+  .pill{
+    display:inline-block;padding:6px 10px;border-radius:0;
+    background:#e7fbff;border:1px solid var(--cyan);color:var(--ink);
+    font-family:var(--mono);font-size:12px;
+    clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+    box-shadow:3px 3px 0 rgba(0,194,216,.2);
+  }
+  .who{display:block;margin-top:4px;font-size:13px;font-weight:700;color:var(--teal)}
+
+  .pile{position:relative;height:460px}
+  .task{
+    position:absolute;left:var(--l);top:var(--t);width:min(230px,86%);
+    transform:translate(-50%,-50%) rotate(var(--r));
+    transition:left .7s cubic-bezier(.2,.75,.2,1), top .7s cubic-bezier(.2,.75,.2,1), transform .7s;
+    background:#fff;border:1px solid var(--line);border-radius:0;padding:9px 12px;
+    clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+    box-shadow:4px 4px 0 rgba(0,151,178,.12);font-size:.95rem;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;white-space:nowrap;
+  }
+  .task.notrans{transition:none}
+  .task.stay{border-color:var(--cyan);background:#f2fdff;font-weight:700;transform:translate(-50%,-50%) rotate(var(--r)) scale(1.06);box-shadow:4px 4px 0 rgba(224,18,106,.16)}
+  .task.gone{width:min(210px,44%);font-size:.78rem;padding:7px 8px}
+  .stamp{
+    border:2px solid var(--mag);color:var(--mag);background:#fff;
+    font-family:var(--mono);font-size:11px;letter-spacing:.12em;padding:1px 5px;border-radius:4px;
+    transform:scale(0);transition:transform .35s;
+  }
+  .task.gone .stamp{transform:scale(1)}
+
+  .shell{
+    display:flex;align-items:flex-start;gap:0;position:relative;
+    background:#fff;border:1px solid var(--teal);border-radius:0;padding:12px;
+    clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);
+    box-shadow:6px 6px 0 rgba(0,151,178,.14);
+  }
+  .shell .main{flex:1 1 auto;min-width:0}
+  .shell .side{flex:0 0 0px;opacity:0;overflow:hidden;min-width:0;transition:flex-basis .55s ease, opacity .35s ease, margin .55s ease}
+  .shell.open .side{flex-basis:240px;opacity:1;margin-left:12px}
+  .shell .win{height:auto;box-shadow:none}
+  .result{max-height:0;opacity:0;overflow:hidden;margin:0;padding:0;transition:max-height .4s ease, opacity .35s ease, margin .35s}
+  .shell.show-result .result{max-height:64px;opacity:1;margin:8px}
+
+  .well{
+    margin-top:12px;border:1px solid var(--mag);background:#fff5f8;border-radius:0;padding:10px 12px;
+    min-height:64px;transition:min-height .5s ease;
+    clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);
+  }
+  .well-h{color:var(--mag);font-weight:700;margin-bottom:6px}
+  .lands{display:flex;flex-wrap:wrap;gap:6px}
+  .land{
+    font-family:var(--mono);font-size:11px;padding:4px 8px;border-radius:0;
+    background:#fff;border:1px solid var(--mag);color:var(--ink);
+    clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);
+  }
+  .land.just{animation:drop .5s ease}
+  @keyframes drop{from{transform:translateY(-16px);opacity:0}to{transform:none;opacity:1}}
+  .meter{margin-top:12px;display:grid;gap:8px}
+  .meter-note{font-size:14px;line-height:1.45;color:var(--ink);font-weight:500}
+  .meter-row{display:grid;grid-template-columns:minmax(9.5em,13.5em) 1fr;gap:8px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .meter-name b{display:block;letter-spacing:.08em;text-transform:uppercase}
+  .meter-name small{display:block;margin-top:2px;font-family:var(--head);font-size:12px;line-height:1.3;letter-spacing:0;text-transform:none;font-weight:400;color:var(--muted)}
+  .track{height:6px;border-radius:0;background:#d7eef3;overflow:hidden}
+  .track i{display:block;height:100%;width:0;background:linear-gradient(90deg,#007f99,var(--cyan));transition:width .6s ease;box-shadow:0 0 10px rgba(0,194,216,.75)}
+  .track.innov i{background:linear-gradient(90deg,#a10d4c,var(--mag));box-shadow:0 0 10px rgba(224,18,106,.55)}
+  .readout{margin-top:8px;font-size:14px;line-height:1.45;color:var(--ink)}
+  .well-sub{font-size:12px;line-height:1.35;color:var(--muted);font-weight:400;margin:-2px 0 8px}
+
+  .slide.finale{grid-template-columns:1fr;align-items:start;align-content:start;padding-top:11vh;gap:2vh}
+  .finale-head{display:grid;grid-template-columns:minmax(240px,380px) minmax(0,1fr);gap:4vw;align-items:end}
+  .finale-head h2{margin:0}
+  .finale-head .now{margin:0}
+  .recap{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:stretch}
+  .lesson{
+    background:#fff;border:1px solid var(--line);padding:14px 14px 16px;min-width:0;
+    clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);
+    opacity:0;transform:translateY(18px);transition:opacity .45s ease, transform .45s ease, border-color .3s;
+  }
+  .lesson.in{opacity:1;transform:none}
+  .lesson.on{border-color:var(--cyan);box-shadow:4px 4px 0 rgba(0,151,178,.14)}
+  .lesson .lk{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--teal);text-transform:uppercase}
+  .lesson h3{font-size:1.15rem;line-height:1.2;margin:8px 0}
+  .lesson p{font-size:.95rem;line-height:1.45;color:var(--muted)}
+  .sumline{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:12px}
+  .sumline b{color:var(--teal);font-size:.95rem}
+  .sumchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+  .sumchips span{
+    padding:6px 8px;border:1px solid var(--cyan);background:#f2fdff;font-weight:700;font-size:.9rem;
+    clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px);
+  }
+  .sumchips .off{border-color:var(--line);background:#f4f7fa;color:#6d7c8d;font-weight:500;text-decoration:line-through}
+  .sumchips .off i{font-style:normal;text-decoration:none;display:inline-block;margin-right:4px;border:1px solid var(--mag);color:var(--mag);padding:0 4px;font-family:var(--mono);font-size:10px;letter-spacing:.08em}
+  .sumtools{list-style:none;margin-top:12px;display:grid;gap:6px}
+  .sumtools li{font-family:var(--mono);font-size:12px;padding:6px 8px;border:1px solid var(--line);background:#f7fcff}
+  .lesson .meter{margin-top:12px}
+  .lesson .meter-row{grid-template-columns:1fr;gap:4px}
+  .sumclose{margin-top:8px;font-size:clamp(1.35rem,2.2vw,1.8rem);font-weight:700;opacity:0;transform:translateY(8px);transition:opacity .4s, transform .4s}
+  .sumclose.in{opacity:1;transform:none}
+
+  .win{
+    width:100%;height:auto;min-height:118px;border-radius:0;overflow:hidden;background:#fff;color:#1b1f23;
+    border:1px solid var(--line);font-family:var(--ui);font-size:11px;line-height:1.35;
+    clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+    box-shadow:4px 4px 0 rgba(0,151,178,.16);animation:pop .45s ease;
+  }
+  @keyframes pop{from{transform:translateY(8px) scale(.96);opacity:0}to{transform:none;opacity:1}}
+  .chrome{height:26px;display:flex;align-items:center;gap:6px;padding:0 8px;color:#fff;font-weight:650}
+  .lights{display:flex;gap:3px}
+  .lights i{width:7px;height:7px;border-radius:50%;display:block}
+  .lights i:nth-child(1){background:#ff5f57}
+  .lights i:nth-child(2){background:#febc2e}
+  .lights i:nth-child(3){background:#28c840}
+  .outlook .chrome{background:#0f6cbd}
+  .excel .chrome{background:#217346}
+  .teams .chrome{background:#5b5fc7}
+  .datev .chrome{background:#063a70}
+  .word .chrome{background:#2b579a}
+  .drive .chrome{background:#fff;color:#202124;border-bottom:1px solid #e6e8eb}
+  .copilot .chrome{background:#fff;color:#242424;border-bottom:1px solid #ececec}
+  .chatgpt .chrome{background:#212121;color:#f4f4f4}
+  .claude .chrome{background:#f6f1e7;color:#3d2c29;border-bottom:1px solid #eadfd2}
+  .gemini .chrome{background:#fff;color:#202124;border-bottom:3px solid #1a73e8}
+  .ki .chrome{background:#f2fdff;color:#0097b2;border-bottom:1px solid #00c2d8}
+  .mail{padding:4px 0}
+  .m{padding:4px 8px}
+  .m b,.m span{display:block}
+  .m span{color:#5c6b76;font-size:10px}
+  .line.hot{background:#e5f4ff;box-shadow:inset 3px 0 0 var(--teal)}
+  .line.lifted{background:#f4fbfe;outline:1px dashed var(--teal);outline-offset:-2px}
+  .sheet{display:grid;grid-template-columns:1.3fr .5fr .7fr;gap:1px;background:#d5ddd8;margin:8px}
+  .sheet span{background:#fff;padding:3px 4px;font-size:10px;min-height:18px}
+  .sheet .hd{background:#e7f4ec;color:#0e5c32;font-weight:700}
+  .sheet .wait{box-shadow:inset 0 -1px 0 #b7cfc2}
+  .sheet .sel{background:#c6efce;color:#145c32;font-weight:650}
+  .bub{margin:8px;padding:6px 8px;border-radius:8px;background:#efeefe;color:#2a2a4a;font-size:11px}
+  .bub.me{background:#5b5fc7;color:#fff}
+  .inv{padding:8px;font-size:11px;color:#16324f}
+  .inv .top{font-weight:700;margin-bottom:4px}
+  .inv .ln{display:flex;justify-content:space-between;padding:2px 0;border-top:1px solid #e4ebf2;min-height:18px}
+  .inv .ln.sel{background:#e5f4ea}
+  .pagelet{margin:8px;border:1px solid #d7e2f2;padding:8px}
+  .pagelet b{display:block;color:#2b579a;margin-bottom:4px}
+  .files{padding:6px 0}
+  .file{display:flex;gap:6px;align-items:center;padding:4px 8px;font-size:11px}
+  .file u{width:14px;height:16px;border-radius:2px;text-decoration:none;flex:none}
+  .file.pdf u{background:#e23b2f}
+  .file.doc u{background:#2b579a}
+  .ask,.done,.you,.ai,.gdoc{margin:8px;font-size:11px}
+  .ask,.done{padding:6px;border-radius:8px;background:#f4f6fb}
+  .done{background:#eef4ff}
+  .you{padding:6px;border-radius:8px;background:#2f2f2f;color:#eee}
+  .chatgpt{background:#171717;color:#eee}
+  .chatgpt .ai{color:#ececec}
+  .claude{background:#f7f3ec;color:#3d2c29}
+  .docchip{display:inline-block;margin:8px;padding:4px 6px;border-radius:6px;background:#fff;border:1px solid #e4d8c8}
+  .spark{width:8px;height:8px;border-radius:2px;background:#1a73e8}
+  .gemini .chrome{border-image:linear-gradient(90deg,#1a73e8,#ea4335,#fbbc04,#34a853) 1}
+
+  @media (max-width:860px){
+    .slide,.slide.title{grid-template-columns:1fr;align-content:start;padding:10vh 5vw 96px;gap:2vh;overflow:auto}
+    .floaters{display:none}
+    h1{font-size:2.3rem}
+    h2{font-size:1.45rem}
+    .desk{height:270px}
+    .pile{height:520px}
+    .placed{width:78%}
+    .shell{flex-direction:column}
+    .shell.open .side{flex-basis:150px;margin-left:0;margin-top:8px}
+    .task.gone{width:42%;font-size:.72rem}
+    .slide.finale{padding-top:10vh}
+    .finale-head{grid-template-columns:1fr;gap:1vh}
+    .recap{grid-template-columns:1fr 1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    body::before,body::after,.floater,.win,.now,.flyer,.lesson,.sumclose,.task,.side,.placed,.shell,.track i,.land.just,.result,.well{
+      animation:none !important;transition:none !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="hud"><a href="../index.html">Concepts</a> · <span data-i18n="hud">Konzept</span> · <span id="hudIdx">01 / 05</span></div>
+<main class="deck" id="deck">
+  <section class="slide title on">
+    <div class="floaters" id="floaters" aria-hidden="true"></div>
+    <div class="copy">
+      <p class="kicker" data-i18n="kicker">Konzept</p>
+      <h1 data-i18n-html="h1">Die reine <em>Innovation</em></h1>
+      <p class="deckline" data-i18n="deck">KI-Automatisierung</p>
+      <p class="lead" data-i18n="lead"></p>
+      <p class="hint" data-i18n="hint"></p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="copy">
+      <p class="kicker" data-i18n="s1k"></p>
+      <h2 data-i18n-html="s1h"></h2>
+      <p data-i18n-html="s1p"></p>
+    </div>
+    <figure>
+      <p class="now" id="nowT"></p>
+      <div class="desk" id="deskT" aria-hidden="true">
+        <div class="placed src" id="srcT"></div>
+        <div class="placed dst" id="dstT"></div>
+        <div class="flyer" id="flyT"><span class="pill" id="flyText"></span><span class="who" id="flyWho"></span></div>
+      </div>
+      <figcaption data-i18n="s1cap"></figcaption>
+    </figure>
+  </section>
+
+  <section class="slide">
+    <div class="copy">
+      <p class="kicker" data-i18n="s2k"></p>
+      <h2 data-i18n-html="s2h"></h2>
+      <p data-i18n-html="s2p"></p>
+    </div>
+    <figure>
+      <p class="now" id="nowC"></p>
+      <div class="pile" id="pile" aria-hidden="true"></div>
+      <figcaption data-i18n="s2cap"></figcaption>
+    </figure>
+  </section>
+
+  <section class="slide">
+    <div class="copy">
+      <p class="kicker" data-i18n="s3k"></p>
+      <h2 data-i18n-html="s3h"></h2>
+      <p data-i18n-html="s3p"></p>
+    </div>
+    <figure>
+      <p class="now" id="nowS"></p>
+      <div class="shell" id="shellS" aria-hidden="true">
+        <div class="main" id="mainS"></div>
+        <div class="side" id="sideS"></div>
+      </div>
+      <figcaption data-i18n="s3cap"></figcaption>
+    </figure>
+  </section>
+
+  <section class="slide">
+    <div class="copy">
+      <p class="kicker" data-i18n="s4k"></p>
+      <h2 data-i18n-html="s4h"></h2>
+      <p data-i18n-html="s4p"></p>
+      <p class="close" data-i18n-html="close"></p>
+    </div>
+    <figure>
+      <p class="now" id="nowA"></p>
+      <div class="shell" id="shellA" aria-hidden="true">
+        <div class="main" id="mainA"></div>
+        <div class="side" id="sideA"></div>
+      </div>
+      <div class="well" id="well">
+        <div class="well-h" id="wellH"></div>
+        <p class="well-sub" data-i18n="wellSub"></p>
+        <div class="lands" id="lands"></div>
+      </div>
+      <div class="meter">
+        <p class="meter-note" data-i18n="barNote"></p>
+        <div class="meter-row"><span class="meter-name"><b data-i18n="transLabel"></b><small data-i18n="transHint"></small></span><span class="track"><i id="transBar"></i></span></div>
+        <div class="meter-row"><span class="meter-name"><b data-i18n="innovLabel"></b><small data-i18n="innovHint"></small></span><span class="track innov"><i id="innovBar"></i></span></div>
+      </div>
+      <div class="readout" id="readout"></div>
+      <figcaption data-i18n="s4cap"></figcaption>
+    </figure>
+  </section>
+
+  <section class="slide finale">
+    <header class="finale-head">
+      <div>
+        <p class="kicker" data-i18n="s5k"></p>
+        <h2 data-i18n-html="s5h"></h2>
+      </div>
+      <p class="now" id="nowF"></p>
+    </header>
+    <div class="recap" id="recap">
+      <article class="lesson">
+        <p class="lk" data-i18n="l1k"></p>
+        <h3 data-i18n="l1h"></h3>
+        <p data-i18n="l1p"></p>
+        <div class="sumline"><span class="pill" id="sumTok"></span><b id="sumWho"></b></div>
+      </article>
+      <article class="lesson">
+        <p class="lk" data-i18n="l2k"></p>
+        <h3 data-i18n="l2h"></h3>
+        <p data-i18n="l2p"></p>
+        <div class="sumchips">
+          <span class="off"><i data-i18n="stamp"></i><b data-i18n="l2copy"></b></span>
+          <span data-i18n="l2a"></span>
+          <span data-i18n="l2b"></span>
+          <span data-i18n="l2c"></span>
+        </div>
+      </article>
+      <article class="lesson">
+        <p class="lk" data-i18n="l3k"></p>
+        <h3 data-i18n="l3h"></h3>
+        <p data-i18n="l3p"></p>
+        <ul class="sumtools">
+          <li data-i18n="ex1"></li>
+          <li data-i18n="ex2"></li>
+          <li data-i18n="ex3"></li>
+          <li data-i18n="ex4"></li>
+        </ul>
+      </article>
+      <article class="lesson">
+        <p class="lk" data-i18n="l4k"></p>
+        <h3 data-i18n="l4h"></h3>
+        <p data-i18n="l4p"></p>
+        <div class="meter">
+          <div class="meter-row"><span class="meter-name"><b data-i18n="transLabel"></b><small data-i18n="transHint"></small></span><span class="track"><i id="transF"></i></span></div>
+          <div class="meter-row"><span class="meter-name"><b data-i18n="innovLabel"></b><small data-i18n="innovHint"></small></span><span class="track innov"><i id="innovF"></i></span></div>
+        </div>
+        <p class="readout" id="readF"></p>
+      </article>
+    </div>
+    <p class="sumclose" id="sumClose" data-i18n-html="close"></p>
+  </section>
+</main>
+
+<nav class="nav">
+  <button type="button" id="prev" data-i18n-aria="prev">‹</button>
+  <div class="dots" id="dots"></div>
+  <button type="button" id="next" data-i18n-aria="next">›</button>
+</nav>
+
+<script>
+(() => {
+  const copy = {
+    de: {
+      docTitle: 'Konzept – KI-Automatisierung', hud: 'Konzept', kicker: 'Konzept',
+      h1: 'Die reine <em>Innovation</em>', deck: 'KI-Automatisierung',
+      lead: 'Viel Arbeit ist Übersetzung: dieselbe Information liegt in einem Programm und muss in einem anderen noch einmal erfasst werden. Den Weg dazwischen geht heute der Mensch.',
+      hint: 'Pfeiltasten oder die Pfeile unten',
+      s1k: '01 — Übersetzungsarbeit', s1h: 'Die Schnittstelle ist <em>der Mensch.</em>',
+      s1p: 'Ein Vorgang steht in der Mail und gehört genauso in die Tabelle. Im Chat soll dieselbe Angabe in die Kartei. Der Beleg wird in der Buchhaltung noch einmal eingetragen. Keines der Programme gibt die Zeile von selbst weiter. <b>Der Mensch ist die Schnittstelle.</b>',
+      s1cap: 'Zuerst Mail, Mensch, Tabelle. Danach Chat, Mensch, Buchhaltung. Der Satz über der Grafik sagt, wo die Zeile gerade ist.',
+      s2k: '02 — Der menschliche Teil', s2h: 'Nur der innovative Teil <em>bleibt menschlich.</em>',
+      s2p: 'Kopieren, Umformulieren und noch einmal Eintippen verschieben nur, was schon da ist. Das schafft nichts Neues und soll die KI tun. Beim Menschen bleiben <b>Entscheidung, Idee und Konzept</b>: der Teil, der wirklich etwas hervorbringt.',
+      s2cap: 'Was nur Information verschiebt, löst sich und bekommt den Stempel KI. Entscheidung, Idee und Konzept bleiben und werden größer.',
+      s3k: '03 — Das KI-System', s3h: 'Zugriff auf <em>alles, was zählt.</em>',
+      s3p: 'Die KI kann die Zeile nur allein hinübertragen, wenn sie beide Seiten sieht: die Mail und die Tabelle, den Chat und die Kartei. Sieht sie nur ein Programm, bleibt der Mensch die Brücke. <b>Das System ist deshalb nicht ein einzelnes Werkzeug.</b> Es ist der Zugriff auf alles, was für die Arbeit zählt.',
+      s3cap: 'Das Werkzeug öffnet sich am Programm und liest die Zeile. Danach dasselbe bei der nächsten Art von Übertragung.',
+      s4k: '04 — Der Kern', s4h: 'Den Kern <em>beschleunigen.</em>',
+      s4p: 'Dieselbe Stunde hat zwei Verwendungen. <b>Übersetzung</b> ist das Eintragen einer Zeile im nächsten Programm. <b>Innovation</b> ist die Zeit, die danach für Entscheidung, Idee und Konzept frei ist. Jede Übertragung, die die KI übernimmt, verkürzt den türkisen Balken und verlängert den rosa. <b>Takt ×1</b> heißt: die Zeit steckt noch ganz im Kopieren. <b>Takt ×4</b> heißt: diese vier Übertragungen sind weg.',
+      s4cap: 'Mit jeder abgegebenen Zeile wird der türkise Balken kürzer und der rosa länger.',
+      close: 'Weniger übersetzen. <em>Mehr erschaffen.</em>',
+      s5k: '05 — Zusammenfassung', s5h: 'Alles auf <em>einmal.</em>',
+      l1k: '01 — Der Mensch', l1h: 'Die Schnittstelle ist der Mensch.',       l1p: 'Die Programme geben die Zeile nicht weiter. Der Mensch ist dazwischen die Schnittstelle.',
+      l2k: '02 — Was bleibt', l2h: 'Nur der innovative Teil bleibt.', l2p: 'Was nur kopiert, übernimmt die KI. Entscheidung, Idee und Konzept bleiben beim Menschen.',
+      l2copy: 'Mail → Tabelle', l2a: 'Entscheidung', l2b: 'Idee', l2c: 'Konzept',
+      l3k: '03 — Das System', l3h: 'Zugriff auf alles, was zählt.', l3p: 'Die KI muss beide Anwendungen sehen, sonst bleibt der Mensch die Brücke. Das System ist dieser Zugriff.',
+      ex1: 'Mail → Tabelle', ex2: 'Chat → Kartei', ex3: 'Ablage → Buchhaltung', ex4: 'Text → Text',
+      l4k: '04 — Der Kern', l4h: 'Der Kern wird schneller.', l4p: 'Vier Übertragungen weniger von Hand. Die frei gewordene Zeit geht in die Innovation. Der Takt steigt auf ×4.',
+      fLines: [
+        'Erstens: die Programme tauschen die Zeile nicht. Der Mensch trägt sie.',
+        'Zweitens: Kopieren schafft nichts Neues. Entscheidung, Idee und Konzept bleiben.',
+        'Drittens: die KI muss beide Seiten sehen. Sonst bleibt der Mensch die Brücke.',
+        'Viertens: jede abgegebene Übertragung macht Zeit für Innovation frei. Takt ×4.',
+        'Das ist das ganze Bild. Weniger übersetzen. Mehr erschaffen.',
+        'Das ist das ganze Bild. Weniger übersetzen. Mehr erschaffen.',
+        'Das ist das ganze Bild. Weniger übersetzen. Mehr erschaffen.',
+        'Das ist das ganze Bild. Weniger übersetzen. Mehr erschaffen.'
+      ],
+      barLines: [
+        'Noch keine der vier Übertragungen ist abgegeben. Die ganze Zeit ist Kopieren. Takt ×1.',
+        'Eine von vier übernimmt die KI. Diese Zeile tippt niemand mehr ab. Ein Teil der Zeit ist frei. Takt ×1.8.',
+        'Zwei von vier sind abgegeben. Türkis und Rosa sind gleich lang: halb Kopieren, halb Innovation. Takt ×2.5.',
+        'Drei von vier sind abgegeben. Nur noch eine Übertragung bleibt von Hand. Takt ×3.3.',
+        'Alle vier sind abgegeben. Diese Kopierarbeit fällt weg. Die Zeit gehört der Innovation. Takt ×4.'
+      ],
+      barNote: 'Türkiser Balken: noch von Hand kopieren. Rosa Balken: Zeit für Entscheidung, Idee und Konzept.',
+      wellSub: 'Diese Zeilen muss niemand mehr abtippen.',
+      transHint: 'Noch von Hand',
+      innovHint: 'Frei für Neues',
+      appMail: 'Mail', appSheet: 'Tabelle', appChat: 'Chat', appBooks: 'Buchhaltung', appText: 'Text', appFiles: 'Ablage', appAi: 'KI',
+      human: 'Mensch', core: 'Innovation', pace: 'Takt', stamp: 'KI',
+      transLabel: 'Übersetzung', innovLabel: 'Innovation',
+      prev: 'Vorherige Folie', next: 'Nächste Folie', goto: 'Folie', nav: 'Folien',
+      mailWho: 'Vorgang', mail2: 'Weitergabe', invShort: 'Beleg',
+      colA: 'Feld', colB: 'Menge', colC: 'Wert', item: 'Vorgang', qty: 'Menge', price: 'Wert',
+      teamsBub: 'Bitte in die Kartei übernehmen.', teamsMe: 'Steht schon in der Mail.',
+      voucher: 'Beleg', datevWho: 'Vorgang', datevAmt: 'Wert',
+      wordTitle: 'Dokument', wordLine: 'Dieselbe Zeile',
+      pdfName: 'Beleg.pdf', docName: 'Dokument.docx',
+      kiAsk: ['Zeile aus der Mail in die Tabelle.', 'Nachricht in die Kartei schreiben.', 'Beleg aus der Ablage lesen.', 'Dokument mit der vorhandenen Zeile füllen.'],
+      kiDone: ['Vorgang · Menge · Wert', 'Kartei ist aktualisiert.', 'Beleg ist gelesen.', 'Text ist übernommen.'],
+      cubes: ['Mail → Tabelle', 'Chat → Kartei', 'Beleg → Buchhaltung', 'Text übernehmen', 'Entscheidung', 'Idee', 'Konzept'],
+      cNow: [
+        'Kopieren und Entscheiden liegen noch in einem Stapel.',
+        '„Mail → Tabelle“ löst sich. Die KI übernimmt es.',
+        '„Chat → Kartei“ löst sich. Die KI übernimmt es.',
+        '„Beleg → Buchhaltung“ löst sich. Die KI übernimmt es.',
+        '„Text übernehmen“ löst sich. Die KI übernimmt es.',
+        'Entscheidung, Idee und Konzept bleiben beim Menschen.'
+      ],
+      tokens: ['Vorgang · Menge · Wert', 'Nachricht → Kartei', 'Beleg.pdf', 'Dokument'],
+      tLines: [
+        '1. Die Zeile liegt in der Mail. Die Tabelle hat sie noch nicht.',
+        '2. Der Mensch nimmt die Zeile mit. Die Programme tun das nicht selbst.',
+        '3. Die Zeile steht jetzt in der Tabelle. Der Mensch hat sie eingetragen.',
+        '4. Dieselbe Art Arbeit noch einmal: der Beleg steht im Chat.',
+        '5. Wieder trägt der Mensch ihn hinüber.',
+        '6. Der Beleg steht in der Buchhaltung. Zweimal dieselbe Übersetzung.'
+      ],
+      sLines: [
+        'Die Zeile liegt in der Mail. Die KI sieht sie noch nicht.',
+        'Die KI öffnet sich an der Mail und kann die Zeile in die Tabelle übernehmen.',
+        'Die Nachricht liegt im Chat. Auch hier ist der Mensch noch die Brücke.',
+        'Die KI sieht den Chat und schreibt die Nachricht in die Kartei.',
+        'Der Beleg liegt in der Ablage. Jemand müsste ihn abtippen.',
+        'Die KI liest den Beleg selbst und bereitet ihn für die Buchhaltung auf.',
+        'Das Dokument wartet auf eine Zeile, die schon woanders steht.',
+        'Die KI füllt das Dokument, weil sie beide Stellen sieht.'
+      ],
+      aLines: [
+        'Die Zeile liegt noch in der Mail. Noch ist die ganze Zeit Übersetzung.',
+        'Die KI kopiert sie. Angekommen ist sie noch nicht, die Balken bleiben gleich.',
+        'Eine von vier ist abgegeben. Der türkise Balken wird kürzer, der rosa länger. Die Entscheidung bleibt beim Menschen.',
+        'Als Nächstes der Chat. Bisher ist eine Übertragung abgegeben.',
+        'Die KI schreibt die Nachricht in die Kartei, statt dass jemand sie abtippt.',
+        'Zwei von vier sind abgegeben. Kopieren und Innovation haben jetzt gleich viel Zeit.',
+        'Der Beleg liegt noch in der Ablage. Zwei Übertragungen sind schon weg.',
+        'Die KI liest den Beleg. Niemand tippt ihn noch einmal ein.',
+        'Drei von vier sind abgegeben. Das Konzept bleibt beim Menschen.',
+        'Das Dokument wartet noch. Eine Übertragung ist von Hand übrig.',
+        'Die KI setzt die vorhandene Zeile ins Dokument.',
+        'Alle vier sind abgegeben. Diese Kopierarbeit fällt weg. Die Zeit gehört der Innovation.'
+      ]
+    },
+    en: {
+      docTitle: 'Concept – AI automation', hud: 'Concept', kicker: 'Concept',
+      h1: 'The pure <em>innovation</em>', deck: 'AI automation',
+      lead: 'Much of the work is translation: the same information sits in one program and has to be entered again in another. Today the person walks that path.',
+      hint: 'Arrow keys, or the arrows below',
+      s1k: '01 — Translation work', s1h: 'The interface is <em>the person.</em>',
+      s1p: 'A record sits in the mail and belongs in the table as well. In chat the same detail should go into the file. The voucher is entered again in accounting. None of the programs passes the line on by itself. <b>The person is the interface.</b>',
+      s1cap: 'First mail, person, table. Then chat, person, accounting. The sentence above the picture says where the line is.',
+      s2k: '02 — The human part', s2h: 'Only the innovative part <em>stays human.</em>',
+      s2p: 'Copying, rephrasing, and typing it in again only move what is already there. That creates nothing new, so AI should do it. What stays with the person is the <b>decision, the idea, and the concept</b>: the part that actually brings something new.',
+      s2cap: 'Whatever only moves information peels away and gets an AI stamp. Decision, idea, and concept stay and grow.',
+      s3k: '03 — The AI system', s3h: 'Access to <em>everything that matters.</em>',
+      s3p: 'AI can carry the line alone only if it sees both sides: the mail and the table, the chat and the file. If it sees only one program, the person stays the bridge. <b>So the system is not a single tool.</b> It is access to everything the work depends on.',
+      s3cap: 'The tool opens on the program and reads the line. Then the same happens for the next kind of transfer.',
+      s4k: '04 — The core', s4h: '<em>Accelerate</em> the core.',
+      s4p: 'The same hour has two uses. <b>Translation</b> is entering a line in the next program. <b>Innovation</b> is the time left after that for the decision, the idea, and the concept. Each transfer AI takes shortens the teal bar and lengthens the pink one. <b>Pace ×1</b> means the time is still all copying. <b>Pace ×4</b> means these four transfers are gone.',
+      s4cap: 'With each finished line the teal bar gets shorter and the pink one longer.',
+      close: 'Less translating. <em>More creating.</em>',
+      s5k: '05 — Summary', s5h: 'All of it, <em>at once.</em>',
+      l1k: '01 — The person', l1h: 'The interface is the person.',       l1p: 'The programs do not pass the line on. The person is the interface between them.',
+      l2k: '02 — What stays', l2h: 'Only the innovative part stays.', l2p: 'Whatever is only copying, AI takes. Decision, idea, and concept stay with the person.',
+      l2copy: 'Mail → table', l2a: 'Decision', l2b: 'Idea', l2c: 'Concept',
+      l3k: '03 — The system', l3h: 'Access to everything that matters.', l3p: 'AI has to see both applications, or the person stays the bridge. The system is that access.',
+      ex1: 'Mail → table', ex2: 'Chat → file', ex3: 'Folder → accounting', ex4: 'Text → text',
+      l4k: '04 — The core', l4h: 'The core gets faster.', l4p: 'Four transfers no longer done by hand. The freed time goes to innovation. The pace rises to ×4.',
+      fLines: [
+        'First: the programs do not exchange the line. The person carries it.',
+        'Second: copying creates nothing new. Decision, idea, and concept stay.',
+        'Third: AI has to see both sides. Otherwise the person stays the bridge.',
+        'Fourth: each finished transfer frees time for innovation. Pace ×4.',
+        'This is the whole picture. Less translating. More creating.',
+        'This is the whole picture. Less translating. More creating.',
+        'This is the whole picture. Less translating. More creating.',
+        'This is the whole picture. Less translating. More creating.'
+      ],
+      barLines: [
+        'None of the four transfers is done yet. All the time is still copying. Pace ×1.',
+        'AI takes one of four. Nobody retypes this line. Part of the time is free. Pace ×1.8.',
+        'Two of four are done. Teal and pink are the same length: half copying, half innovation. Pace ×2.5.',
+        'Three of four are done. Only one transfer is still by hand. Pace ×3.3.',
+        'All four are done. This copying drops away. The time belongs to innovation. Pace ×4.'
+      ],
+      barNote: 'Teal bar: still copied by hand. Pink bar: time for the decision, the idea, and the concept.',
+      wellSub: 'Nobody has to retype these lines.',
+      transHint: 'Still by hand',
+      innovHint: 'Free for something new',
+      appMail: 'Mail', appSheet: 'Table', appChat: 'Chat', appBooks: 'Accounting', appText: 'Text', appFiles: 'Folder', appAi: 'AI',
+      human: 'Person', core: 'Innovation', pace: 'Pace', stamp: 'AI',
+      transLabel: 'Translation', innovLabel: 'Innovation',
+      prev: 'Previous slide', next: 'Next slide', goto: 'Slide', nav: 'Slides',
+      mailWho: 'Record', mail2: 'Forward', invShort: 'Voucher',
+      colA: 'Field', colB: 'Qty', colC: 'Value', item: 'Record', qty: 'Qty', price: 'Value',
+      teamsBub: 'Please put this into the file.', teamsMe: 'It is already in the mail.',
+      voucher: 'Voucher', datevWho: 'Record', datevAmt: 'Value',
+      wordTitle: 'Document', wordLine: 'The same line',
+      pdfName: 'Voucher.pdf', docName: 'Document.docx',
+      kiAsk: ['Line from the mail into the table.', 'Write the message into the file.', 'Read the voucher from the folder.', 'Fill the document with the existing line.'],
+      kiDone: ['Record · qty · value', 'The file is updated.', 'The voucher is read.', 'The text is carried over.'],
+      cubes: ['Mail → table', 'Chat → file', 'Voucher → accounting', 'Carry the text', 'Decision', 'Idea', 'Concept'],
+      cNow: [
+        'Copying and deciding are still in one pile.',
+        '“Mail → table” peels off. AI takes it.',
+        '“Chat → file” peels off. AI takes it.',
+        '“Voucher → accounting” peels off. AI takes it.',
+        '“Carry the text” peels off. AI takes it.',
+        'Decision, idea, and concept stay with the person.'
+      ],
+      tokens: ['Record · qty · value', 'Message → file', 'Voucher.pdf', 'Document'],
+      tLines: [
+        '1. The line is in the mail. The table does not have it yet.',
+        '2. The person takes the line. The programs do not do that themselves.',
+        '3. The line is now in the table. The person entered it.',
+        '4. The same kind of work again: the voucher is in chat.',
+        '5. Again the person carries it across.',
+        '6. The voucher is in accounting. The same translation, twice.'
+      ],
+      sLines: [
+        'The line is in the mail. AI does not see it yet.',
+        'AI opens on the mail and can take the line into the table.',
+        'The message is in chat. Here too the person is still the bridge.',
+        'AI sees the chat and writes the message into the file.',
+        'The voucher is in the folder. Someone would have to retype it.',
+        'AI reads the voucher itself and prepares it for accounting.',
+        'The document is waiting for a line that already exists somewhere else.',
+        'AI fills the document because it sees both places.'
+      ],
+      aLines: [
+        'The line is still in the mail. All the time is still translation.',
+        'AI copies it. It has not arrived yet, so the bars stay as they are.',
+        'One of four is done. The teal bar gets shorter, the pink one longer. The decision stays with the person.',
+        'Next is the chat. So far one transfer is done.',
+        'AI writes the message into the file instead of someone retyping it.',
+        'Two of four are done. Copying and innovation now have the same amount of time.',
+        'The voucher is still in the folder. Two transfers are already gone.',
+        'AI reads the voucher. Nobody types it in again.',
+        'Three of four are done. The concept stays with the person.',
+        'The document is still waiting. One transfer is left to do by hand.',
+        'AI puts the existing line into the document.',
+        'All four are done. This copying drops away. The time belongs to innovation.'
+      ]
+    }
+  };
+
+  const pairs = [
+    ['outlook', 'ki0'],
+    ['teams', 'ki1'],
+    ['drive', 'ki2'],
+    ['word', 'ki3']
+  ];
+  const mixed = [
+    ['50%', '34%', '-2deg'], ['50%', '44%', '1.5deg'], ['50%', '54%', '-1.5deg'], ['50%', '64%', '2deg'],
+    ['50%', '74%', '-1deg'], ['50%', '84%', '1deg'], ['50%', '94%', '0deg']
+  ];
+  const parked = [
+    ['27%', '12%', '0deg'], ['73%', '12%', '0deg'], ['27%', '26%', '0deg'], ['73%', '26%', '0deg']
+  ];
+  const kept = [['50%', '46%', '0deg'], ['50%', '62%', '0deg'], ['50%', '78%', '0deg']];
+
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const BEAT = reduced ? 1e9 : 2200;
+  const $ = s => document.querySelector(s);
+  let lang = 'de';
+  let index = 0;
+  let seen = { lang: '', t: -1, c: -1, s: -1, a: -1, f: -1 };
+
+  function chrome(name, title, body) {
+    const el = document.createElement('div');
+    el.className = 'win ' + (name.indexOf('ki') === 0 ? 'ki' : name);
+    const mark = (name === 'ki' || name.indexOf('ki') === 0)
+      ? '<span class="spark"></span>'
+      : '<span class="lights"><i></i><i></i><i></i></span>';
+    el.innerHTML = '<div class="chrome">' + mark + '<b>' + title + '</b></div>' + body;
+    return el;
+  }
+  function makeWin(name, pack, opt) {
+    opt = opt || {};
+    const mark = (opt.hot ? ' hot' : '') + (opt.lifted ? ' lifted' : '');
+    const blank = '\u00a0';
+    if (name === 'outlook') return chrome('outlook', pack.appMail, '<div class="mail"><div class="m line' + mark + '"><b>' + pack.mailWho + '</b><span>' + pack.tokens[0] + '</span></div><div class="m"><b>' + pack.mail2 + '</b><span>' + pack.invShort + '</span></div></div>');
+    if (name === 'excel') {
+      const cls = opt.filled ? 'sel' : 'wait';
+      const a = opt.filled ? pack.item : blank;
+      const b = opt.filled ? pack.qty : blank;
+      const c = opt.filled ? pack.price : blank;
+      return chrome('excel', pack.appSheet, '<div class="sheet"><span class="hd">' + pack.colA + '</span><span class="hd">' + pack.colB + '</span><span class="hd">' + pack.colC + '</span><span class="' + cls + '">' + a + '</span><span class="' + cls + '">' + b + '</span><span class="' + cls + '">' + c + '</span></div>');
+    }
+    if (name === 'teams') return chrome('teams', pack.appChat, '<div class="bub line' + mark + '">' + pack.teamsBub + '</div><div class="bub me">' + pack.teamsMe + '</div>');
+    if (name === 'datev') return chrome('datev', pack.appBooks, '<div class="inv"><div class="top">' + pack.voucher + '</div><div class="ln' + (opt.filled ? ' sel' : '') + '"><span>' + (opt.filled ? pack.datevWho : blank) + '</span><span>' + (opt.filled ? pack.datevAmt : blank) + '</span></div></div>');
+    if (name === 'word') return chrome('word', pack.appText, '<div class="pagelet line' + mark + '"><b>' + pack.wordTitle + '</b>' + pack.wordLine + '</div>');
+    if (name === 'drive') return chrome('drive', pack.appFiles, '<div class="files"><div class="file pdf line' + mark + '"><u></u>' + pack.pdfName + '</div><div class="file doc"><u></u>' + pack.docName + '</div></div>');
+    if (name.indexOf('ki') === 0) {
+      const i = Number(name.slice(2)) || 0;
+      return chrome('ki', pack.appAi, '<div class="ask">' + pack.kiAsk[i] + '</div><div class="done result">' + pack.kiDone[i] + '</div>');
+    }
+    return chrome(name, name, '');
+  }
+  function mount(id, name, pack, opt) {
+    const slot = $(id);
+    slot.replaceChildren(makeWin(name, pack, opt));
+  }
+  function setFilled(root, name, pack, filled) {
+    const blank = '\u00a0';
+    if (name === 'excel') {
+      const cells = [...root.querySelectorAll('.sheet span')].filter(s => !s.classList.contains('hd'));
+      const vals = filled ? [pack.item, pack.qty, pack.price] : [blank, blank, blank];
+      cells.forEach((c, i) => {
+        c.textContent = vals[i];
+        c.className = filled ? 'sel' : 'wait';
+      });
+    }
+    if (name === 'datev') {
+      const ln = root.querySelector('.ln');
+      if (!ln) return;
+      ln.classList.toggle('sel', filled);
+      ln.children[0].textContent = filled ? pack.datevWho : blank;
+      ln.children[1].textContent = filled ? pack.datevAmt : blank;
+    }
+  }
+  function setLine(root, hot, lifted) {
+    const line = root.querySelector('.line');
+    if (!line) return;
+    line.classList.toggle('hot', hot);
+    line.classList.toggle('lifted', lifted);
+  }
+  function setNow(el, text) {
+    if (el.textContent === text) return;
+    el.textContent = text;
+    if (reduced) return;
+    el.style.animation = 'none';
+    void el.offsetWidth;
+    el.style.animation = '';
+  }
+  function place(el, spot) {
+    el.style.setProperty('--l', spot[0]);
+    el.style.setProperty('--t', spot[1]);
+    el.style.setProperty('--r', spot[2]);
+  }
+
+  function paintFloaters(pack) {
+    const box = $('#floaters');
+    box.replaceChildren();
+    ['outlook', 'excel', 'ki0'].forEach(name => {
+      const wrap = document.createElement('div');
+      wrap.className = 'floater';
+      wrap.appendChild(makeWin(name, pack, { filled: true }));
+      box.appendChild(wrap);
+    });
+  }
+  function paintT(beat, pack) {
+    const scene = beat < 3 ? 0 : 1;
+    const sub = beat % 3;
+    const desk = $('#deskT');
+    const token = scene === 0 ? pack.tokens[0] : pack.voucher;
+    if (desk.dataset.scene !== String(scene) || desk.dataset.lang !== lang) {
+      mount('#srcT', scene === 0 ? 'outlook' : 'teams', pack, { hot: sub === 0, lifted: sub > 0 });
+      mount('#dstT', scene === 0 ? 'excel' : 'datev', pack, { filled: sub === 2 });
+      desk.dataset.scene = String(scene);
+      desk.dataset.lang = lang;
+      const fly = $('#flyT');
+      fly.classList.add('notrans');
+      fly.classList.remove('at-mid', 'at-dst');
+      void fly.offsetWidth;
+      fly.classList.remove('notrans');
+    } else {
+      setLine($('#srcT'), sub === 0, sub > 0);
+      setFilled($('#dstT'), scene === 0 ? 'excel' : 'datev', pack, sub === 2);
+    }
+    $('#dstT').classList.toggle('arrived', sub === 2);
+    $('#flyText').textContent = token;
+    $('#flyWho').textContent = pack.human;
+    const fly = $('#flyT');
+    fly.classList.toggle('at-mid', sub === 1);
+    fly.classList.toggle('at-dst', sub === 2);
+    setNow($('#nowT'), pack.tLines[beat]);
+  }
+  function paintC(beat, pack) {
+    const pile = $('#pile');
+    let fresh = false;
+    if (pile.dataset.lang !== lang || pile.children.length !== 7) {
+      fresh = true;
+      pile.dataset.lang = lang;
+      pile.replaceChildren();
+      pack.cubes.forEach((label, i) => {
+        const el = document.createElement('div');
+        el.className = 'task notrans';
+        el.innerHTML = (i < 4 ? '<span class="stamp">' + pack.stamp + '</span>' : '') + '<span>' + label + '</span>';
+        pile.appendChild(el);
+      });
+    }
+    const park = parked;
+    if (beat < seen.c) pile.querySelectorAll('.task').forEach(el => el.classList.add('notrans'));
+    [...pile.children].forEach((el, i) => {
+      const copyTask = i < 4;
+      const gone = copyTask && beat > i;
+      el.classList.toggle('gone', gone);
+      el.classList.toggle('stay', !copyTask && beat >= 5);
+      place(el, gone ? park[i] : (!copyTask && beat >= 5 ? kept[i - 4] : mixed[i]));
+      el.style.zIndex = gone ? '1' : String(8 - i);
+    });
+    if (fresh || beat < seen.c) {
+      void pile.offsetWidth;
+      pile.querySelectorAll('.task').forEach(el => el.classList.remove('notrans'));
+    }
+    setNow($('#nowC'), pack.cNow[beat]);
+  }
+  function paintPair(beat, pack, per, shellId, mainId, sideId, nowId, lines, showResult) {
+    const pair = Math.floor(beat / per);
+    const sub = beat % per;
+    const shell = $(shellId);
+    const spec = pairs[pair];
+    if (shell.dataset.pair !== String(pair) || shell.dataset.lang !== lang) {
+      mount(mainId, spec[0], pack, { hot: sub === 0, lifted: sub > 0 });
+      mount(sideId, spec[1], pack, {});
+      shell.dataset.pair = String(pair);
+      shell.dataset.lang = lang;
+    } else {
+      setLine($(mainId), sub === 0, sub > 0);
+    }
+    shell.classList.toggle('open', sub >= 1);
+    shell.classList.toggle('show-result', showResult(sub));
+    setNow($(nowId), lines[beat]);
+  }
+  function paintF(beat, pack) {
+    const cards = [...document.querySelectorAll('#recap .lesson')];
+    const done = beat >= 3;
+    cards.forEach((el, i) => {
+      el.classList.toggle('in', beat >= i);
+      el.classList.toggle('on', beat < 4 ? beat === i : true);
+    });
+    $('#sumTok').textContent = pack.tokens[0];
+    $('#sumWho').textContent = pack.human;
+    $('#transF').style.width = done ? '0%' : '100%';
+    $('#innovF').style.width = done ? '100%' : '0%';
+    $('#readF').textContent = pack.barLines[done ? 4 : 0];
+    $('#sumClose').classList.toggle('in', beat >= 4);
+    setNow($('#nowF'), pack.fLines[beat]);
+  }
+
+  const slides = [...document.querySelectorAll('.slide')];
+  const dotBtns = slides.map((_, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.addEventListener('click', () => show(i));
+    $('#dots').appendChild(b);
+    return b;
+  });
+  function show(i) {
+    index = (i + slides.length) % slides.length;
+    slides.forEach((s, n) => {
+      const on = n === index;
+      s.classList.toggle('on', on);
+      s.setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
+    dotBtns.forEach((b, n) => {
+      b.classList.toggle('on', n === index);
+      b.setAttribute('aria-current', n === index ? 'true' : 'false');
+    });
+    $('#hudIdx').textContent = String(index + 1).padStart(2, '0') + ' / ' + String(slides.length).padStart(2, '0');
+  }
+  function applyLang(next) {
+    lang = next === 'en' ? 'en' : 'de';
+    const pack = copy[lang];
+    document.documentElement.lang = lang;
+    document.title = pack.docTitle;
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = pack[el.dataset.i18n] || ''; });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = pack[el.dataset.i18nHtml] || ''; });
+    document.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', pack[el.dataset.i18nAria] || ''));
+    document.querySelector('nav.nav').setAttribute('aria-label', pack.nav);
+    dotBtns.forEach((b, i) => b.setAttribute('aria-label', pack.goto + ' ' + (i + 1)));
+    $('#deskT').dataset.lang = '';
+    $('#pile').dataset.lang = '';
+    $('#shellS').dataset.lang = '';
+    $('#shellA').dataset.lang = '';
+    $('#lands').dataset.lang = '';
+    seen.lang = '';
+    paintFloaters(pack);
+    try { localStorage.setItem('konzept-lang', lang); } catch (err) {}
+  }
+
+  $('#prev').addEventListener('click', () => show(index - 1));
+  $('#next').addEventListener('click', () => show(index + 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); show(index + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(index - 1); }
+  });
+  let swipeX = null;
+  $('#deck').addEventListener('pointerdown', e => { if (e.target.closest('button')) return; swipeX = e.clientX; });
+  $('#deck').addEventListener('pointerup', e => {
+    if (swipeX == null) return;
+    const dx = e.clientX - swipeX;
+    swipeX = null;
+    if (Math.abs(dx) > 56) show(index + (dx < 0 ? 1 : -1));
+  });
+
+  try { lang = localStorage.getItem('konzept-lang') === 'en' ? 'en' : 'de'; } catch (err) {}
+  applyLang(lang);
+  show(0);
+
+  function beat(n, now) { return reduced ? n - 1 : Math.floor(now / BEAT) % n; }
+  function frame(now) {
+    const pack = copy[lang];
+    const t = beat(6, now);
+    const c = beat(6, now);
+    const s = beat(8, now);
+    const a = beat(12, now);
+    const f = beat(8, now);
+    if (t !== seen.t || lang !== seen.lang) paintT(t, pack);
+    if (c !== seen.c || lang !== seen.lang) paintC(c, pack);
+    if (s !== seen.s || lang !== seen.lang) paintPair(s, pack, 2, '#shellS', '#mainS', '#sideS', '#nowS', pack.sLines, sub => sub >= 1);
+    if (a !== seen.a || lang !== seen.lang) {
+      paintPair(a, pack, 3, '#shellA', '#mainA', '#sideA', '#nowA', pack.aLines, sub => sub === 2);
+      const done = Math.floor(a / 3) + (a % 3 === 2 ? 1 : 0);
+      const innov = done / 4;
+      $('#transBar').style.width = ((1 - innov) * 100) + '%';
+      $('#innovBar').style.width = (innov * 100) + '%';
+      $('#readout').textContent = pack.barLines[done];
+      $('#wellH').textContent = pack.core;
+      $('#well').style.minHeight = (64 + done * 18) + 'px';
+      const lands = $('#lands');
+      if (lands.childElementCount !== done || lands.dataset.lang !== lang) {
+        lands.dataset.lang = lang;
+        lands.replaceChildren();
+        for (let i = 0; i < done; i++) {
+          const d = document.createElement('span');
+          d.className = 'land' + (i === done - 1 ? ' just' : '');
+          d.textContent = pack.tokens[i];
+          lands.appendChild(d);
+        }
+      }
+    }
+    if (f !== seen.f || lang !== seen.lang) paintF(f, pack);
+    seen = { lang, t, c, s, a, f };
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concepts</title>
+<style>
+  :root{--ink:#102033;--muted:#3a5168;--paper:#eef7fb;--line:#9fd0de;--mag:#e0126a}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100svh;background:var(--paper);color:var(--ink);
+    font-family:"Segoe UI","Helvetica Neue",system-ui,sans-serif;
+    padding:18vh 8vw 12vh;
+  }
+  h1{font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--muted);margin-bottom:2.5rem}
+  ul{list-style:none;max-width:36rem}
+  a{color:inherit;text-decoration:none;display:block;padding:1.1rem 0;border-top:1px solid var(--line)}
+  li:last-child a{border-bottom:1px solid var(--line)}
+  a strong{display:block;font-size:clamp(1.6rem,3vw,2rem);font-weight:650;letter-spacing:-.02em}
+  a span{display:block;margin-top:.35rem;color:var(--muted)}
+  a:hover strong{color:var(--mag)}
+  .lang{position:fixed;top:22px;right:8vw;display:flex}
+  .lang button{
+    font:inherit;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);background:transparent;border:1px solid var(--line);
+    padding:6px 10px;cursor:pointer;
+  }
+  .lang button + button{border-left:none}
+  .lang button.on{color:var(--ink);border-color:var(--ink)}
+  .lang button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+</style>
+</head>
+<body>
+  <div class="lang" role="group">
+    <button type="button" data-lang="de" aria-pressed="true">DE</button>
+    <button type="button" data-lang="en" aria-pressed="false">EN</button>
+  </div>
+  <h1>Concepts</h1>
+  <ul>
+    <li>
+      <a href="die-reine-innovation/index.html">
+        <strong id="title">Die reine Innovation</strong>
+        <span id="deck">KI-Automatisierung</span>
+      </a>
+    </li>
+  </ul>
+<script>
+  var copy = {
+    de: { title: 'Die reine Innovation', deck: 'KI-Automatisierung' },
+    en: { title: 'The pure innovation', deck: 'AI automation' }
+  };
+  function apply(next) {
+    var lang = next === 'en' ? 'en' : 'de';
+    var pack = copy[lang];
+    document.documentElement.lang = lang;
+    document.getElementById('title').textContent = pack.title;
+    document.getElementById('deck').textContent = pack.deck;
+    document.querySelectorAll('.lang button').forEach(function (b) {
+      var on = b.dataset.lang === lang;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    try { localStorage.setItem('konzept-lang', lang); } catch (err) {}
+  }
+  document.querySelectorAll('.lang button').forEach(function (b) {
+    b.addEventListener('click', function () { apply(b.dataset.lang); });
+  });
+  var saved = 'de';
+  try { saved = localStorage.getItem('konzept-lang') === 'en' ? 'en' : 'de'; } catch (err) {}
+  apply(saved);
+</script>
+</body>
+</html>

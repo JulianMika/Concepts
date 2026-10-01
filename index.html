@@ -25,15 +25,15 @@
     color:var(--muted);background:transparent;border:1px solid var(--line);
     padding:6px 10px;cursor:pointer;
   }
-  .lang button + button{border-left:none}
-  .lang button.on{color:var(--ink);border-color:var(--ink)}
+  .lang button + button{margin-left:-1px}
+  .lang button.on{position:relative;z-index:1;color:var(--ink);border-color:var(--ink)}
   .lang button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 </style>
 </head>
 <body>
   <div class="lang" role="group">
-    <button type="button" data-lang="de" aria-pressed="true">DE</button>
     <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    <button type="button" data-lang="de" aria-pressed="true">DE</button>
   </div>
   <h1>Concepts</h1>
   <ul>

@@ -260,19 +260,56 @@
   .gemini .chrome{border-image:linear-gradient(90deg,#1a73e8,#ea4335,#fbbc04,#34a853) 1}
 
   @media (max-width:860px){
-    .slide,.slide.title{grid-template-columns:1fr;align-content:start;padding:10vh 5vw 96px;gap:2vh;overflow:auto}
+    .hud{top:max(10px,env(safe-area-inset-top));left:12px;max-width:calc(100% - 24px);letter-spacing:.08em;font-size:10px}
+    .slide,.slide.title{
+      grid-template-columns:1fr;align-content:start;
+      padding:64px 18px calc(84px + env(safe-area-inset-bottom));
+      gap:12px;overflow:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
+    }
     .floaters{display:none}
-    h1{font-size:2.3rem}
-    h2{font-size:1.45rem}
-    .desk{height:270px}
-    .pile{height:520px}
-    .placed{width:78%}
-    .shell{flex-direction:column}
-    .shell.open .side{flex-basis:150px;margin-left:0;margin-top:8px}
-    .task.gone{width:42%;font-size:.72rem}
-    .slide.finale{padding-top:10vh}
-    .finale-head{grid-template-columns:1fr;gap:1vh}
-    .recap{grid-template-columns:1fr 1fr}
+    h1{font-size:2.15rem;max-width:none}
+    h2{font-size:1.35rem;max-width:none}
+    .kicker{letter-spacing:.08em;font-size:11px;margin-bottom:8px}
+    .lead,.copy p{font-size:1rem;line-height:1.45}
+    .now{font-size:.9rem;min-height:0}
+    .deck::after{
+      content:"";position:fixed;z-index:9;top:0;left:0;right:0;pointer-events:none;
+      height:calc(52px + env(safe-area-inset-top));
+      background:linear-gradient(#eef7fb 62%, rgba(238,247,251,0));
+    }
+    .desk{height:230px}
+    .placed{width:88%}
+    .placed.src,.placed.dst{transform:none}
+    .pile{height:280px}
+    .task{width:min(250px,82%);font-size:.88rem;white-space:normal}
+    .task.gone{width:46%;font-size:.72rem}
+    .shell{flex-direction:column;padding:8px}
+    .shell.open .side{flex-basis:auto;margin-left:0;margin-top:8px}
+    .win{min-height:0}
+    .meter-row{grid-template-columns:1fr;gap:4px}
+    .nav{bottom:max(10px,env(safe-area-inset-bottom));gap:6px}
+    .nav > button{width:44px;height:44px}
+    .dots{gap:2px}
+    .dots button{width:36px;height:36px;border-color:transparent;background:transparent;transform:none}
+    .dots button::before{
+      content:"";display:block;width:8px;height:8px;margin:13px auto 0;
+      transform:rotate(45deg);border:1px solid var(--teal);background:transparent;
+    }
+    .dots button.on{background:transparent}
+    .dots button.on::before{background:var(--teal)}
+    .slide.finale{padding-top:64px}
+    .finale-head{grid-template-columns:1fr;gap:10px}
+    .recap{grid-template-columns:1fr}
+    .lesson:not(.in){display:none}
+    .lesson h3{font-size:1.05rem}
+    .sumchips span{white-space:nowrap}
+  }
+  @media (max-width:860px) and (max-height:700px){
+    h1{font-size:1.9rem}
+    h2{font-size:1.2rem}
+    .lead,.copy p{font-size:.95rem}
+    .desk{height:190px}
+    .pile{height:220px}
   }
   @media (prefers-reduced-motion:reduce){
     body::before,body::after,.floater,.win,.now,.flyer,.lesson,.sumclose,.task,.side,.placed,.shell,.track i,.land.just,.result,.well{
@@ -282,7 +319,7 @@
 </style>
 </head>
 <body>
-<div class="hud"><a href="../index.html">Concepts</a> · <span data-i18n="hud">Konzept</span> · <span id="hudIdx">01 / 05</span></div>
+<div class="hud"><a href="../index.html">Concepts</a> · <span id="hudIdx">01 / 05</span></div>
 <main class="deck" id="deck">
   <section class="slide title on">
     <div class="floaters" id="floaters" aria-hidden="true"></div>

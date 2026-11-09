@@ -83,50 +83,51 @@
   .topics span{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
   .topics a:hover strong,.topics a:hover em{color:var(--mag)}
   .atom{
-    width:min(100%,52vh,520px);aspect-ratio:1;margin-inline:auto;position:relative;
-    perspective:680px;transform-style:preserve-3d;
-  }
-  .atom::before{
-    content:"";position:absolute;inset:16%;border-radius:50%;pointer-events:none;
-    background:radial-gradient(circle,rgba(79,212,234,.38),rgba(255,77,141,.1) 42%,transparent 70%);
-    filter:blur(10px);
+    width:min(100%,50vh,480px);aspect-ratio:1;margin-inline:auto;position:relative;
+    perspective:900px;transform-style:preserve-3d;
   }
   .spin{
     position:absolute;inset:0;transform-style:preserve-3d;
-    animation:tumble 12s ease-in-out infinite alternate;
+    animation:tumble 26s ease-in-out infinite alternate;
   }
   @keyframes tumble{
-    from{transform:rotateX(-22deg) rotateY(-36deg)}
-    to{transform:rotateX(26deg) rotateY(42deg)}
+    from{transform:rotateX(-14deg) rotateY(-22deg)}
+    to{transform:rotateX(16deg) rotateY(26deg)}
   }
   .ring{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateY(var(--y)) rotateX(var(--x))}
-  .track{
-    container-type:size;position:absolute;left:11%;top:11%;width:78%;height:78%;
+  .hoop,.track{
+    position:absolute;left:12%;top:12%;width:76%;height:76%;border-radius:50%;
     transform-style:preserve-3d;
-    animation:ride var(--dur) linear infinite;animation-direction:var(--dir,normal);
   }
+  .hoop{border:1px solid color-mix(in srgb,var(--c) 42%,transparent)}
+  .track{container-type:size;animation:ride var(--dur) linear infinite;animation-direction:var(--dir,normal)}
   @keyframes ride{to{transform:rotateZ(360deg)}}
-  .track i,.track b{
-    position:absolute;left:50%;top:-2px;width:4px;height:4px;margin-left:-2px;border-radius:50%;
-    background:var(--c);transform-origin:2px calc(50cqb + 2px);transform:rotate(var(--a));
+  .track>b{
+    position:absolute;left:50%;top:-6px;width:14px;height:14px;margin-left:-7px;
+    transform-origin:7px calc(50cqb + 6px);transform:rotate(var(--a));
+    transform-style:preserve-3d;background:none;
   }
-  .track i{opacity:.72;box-shadow:0 0 6px var(--c)}
-  .track b{
-    top:-8px;width:16px;height:16px;margin-left:-8px;transform-origin:8px calc(50cqb + 8px);
-    background:radial-gradient(circle at 32% 30%,#fff,var(--c) 42%,#041018);box-shadow:0 0 16px var(--c);
+  .r1{--x:72deg;--y:0deg;--dur:18s;--c:#4fd4ea}
+  .r2{--x:72deg;--y:60deg;--dur:26s;--dir:reverse;--c:#ff4d8d}
+  .r3{--x:72deg;--y:120deg;--dur:34s;--c:#7eebf7}
+  .core{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d}
+  .core span{position:absolute;width:42px;height:42px;margin:-21px;transform-style:preserve-3d;transform:translate3d(var(--px),var(--py),var(--pz))}
+  .core .n1{--px:-15px;--py:-9px;--pz:14px;--c:#4fd4ea}
+  .core .n2{--px:16px;--py:-7px;--pz:-12px;--c:#ff4d8d}
+  .core .n3{--px:-1px;--py:15px;--pz:2px;--c:#7eebf7}
+  .body,.globe,.mer{position:absolute;inset:0;border-radius:50%;transform-style:preserve-3d}
+  .body{
+    background:
+      radial-gradient(circle at 32% 28%,#fff 0%,rgba(255,255,255,.4) 12%,transparent 28%),
+      radial-gradient(circle at 55% 62%,var(--c) 0%,#102430 70%);
+    box-shadow:inset -8px -10px 14px rgba(0,0,0,.35);
   }
-  .r1{--x:74deg;--y:0deg;--dur:9s;--c:#4fd4ea}
-  .r2{--x:74deg;--y:60deg;--dur:13s;--dir:reverse;--c:#ff4d8d}
-  .r3{--x:74deg;--y:120deg;--dur:17s;--c:#7eebf7}
-  .core{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;animation:coreturn 22s linear infinite}
-  @keyframes coreturn{to{transform:rotateY(360deg)}}
-  .core span{
-    position:absolute;width:38px;height:38px;margin:-19px;border-radius:50%;
-    transform:translate3d(var(--px),var(--py),var(--pz));
+  .globe{animation:ballspin 28s linear infinite}
+  @keyframes ballspin{to{transform:rotateY(360deg)}}
+  .mer{
+    background:radial-gradient(circle at 34% 30%,#fff 0%,var(--c) 28%,#102430 74%);
+    transform:rotateY(var(--ry));
   }
-  .core .n1{--px:-20px;--py:-12px;--pz:26px;background:radial-gradient(circle at 34% 30%,#fff,#4fd4ea 40%,#046072)}
-  .core .n2{--px:22px;--py:-8px;--pz:-18px;background:radial-gradient(circle at 34% 30%,#fff,#ff4d8d 44%,#7a123f)}
-  .core .n3{--px:-4px;--py:20px;--pz:6px;background:radial-gradient(circle at 34% 30%,#fff,#7eebf7 40%,#08586c)}
   footer{
     position:fixed;z-index:5;left:0;right:0;bottom:16px;text-align:center;
     font-family:var(--mono);font-size:11px;letter-spacing:.08em;
@@ -141,7 +142,7 @@
     footer{bottom:max(12px,env(safe-area-inset-bottom))}
   }
   @media (prefers-reduced-motion:reduce){
-    body::before,body::after,.spin,.track,.core{animation:none}
+    body::before,body::after,.spin,.track,.globe{animation:none}
     .spin{transform:rotateX(18deg) rotateY(-32deg)}
   }
 </style>
@@ -211,17 +212,30 @@
   var saved = 'de';
   try { saved = localStorage.getItem('konzept-lang') === 'en' ? 'en' : 'de'; } catch (err) {}
   apply(saved);
+  function makeBall(el) {
+    var body = document.createElement('i');
+    body.className = 'body';
+    el.appendChild(body);
+  }
+  document.querySelectorAll('.core span').forEach(makeBall);
   document.querySelectorAll('.ring').forEach(function (ring) {
+    var hoop = document.createElement('div');
+    hoop.className = 'hoop';
+    ring.appendChild(hoop);
     var track = document.createElement('div');
     track.className = 'track';
-    for (var i = 0; i < 48; i++) {
-      var dot = document.createElement('i');
-      dot.style.setProperty('--a', (i * 7.5) + 'deg');
-      track.appendChild(dot);
-    }
     var ball = document.createElement('b');
     ball.style.setProperty('--a', '0deg');
     track.appendChild(ball);
+    var globe = document.createElement('span');
+    globe.className = 'globe';
+    for (var n = 0; n < 4; n++) {
+      var slice = document.createElement('i');
+      slice.className = 'mer';
+      slice.style.setProperty('--ry', (n * 45) + 'deg');
+      globe.appendChild(slice);
+    }
+    ball.appendChild(globe);
     ring.appendChild(track);
   });
 </script>

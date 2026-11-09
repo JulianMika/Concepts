@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Konzept – KI-gestützte menschliche Kunst</title>
+<meta name="description" content="Ein Konzept zur KI-gestützten menschlichen Kunst von Julian Geiss. ArtCraft, geführt über MCP aus Cursor, Claude oder OpenCode.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="KI-gestützte menschliche Kunst">
+<meta property="og:description" content="Das Konzept bleibt beim Menschen. Cursor, Claude oder OpenCode trägt es über MCP nach ArtCraft.">
+<meta property="og:url" content="https://julianmika.github.io/Concepts/ai-powered-human-art/">
+<meta property="og:image" content="https://julianmika.github.io/Concepts/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="KI-gestützte menschliche Kunst">
+<meta name="twitter:description" content="Das Konzept bleibt beim Menschen. Cursor, Claude oder OpenCode trägt es über MCP nach ArtCraft.">
+<meta name="twitter:image" content="https://julianmika.github.io/Concepts/og-image.png">
+<link href="../fonts/fonts.css" rel="stylesheet">
+<style>
+  :root{
+    --ink:#e8f6fb;--muted:#a9c0ce;--line:#245064;--paper:#07141c;--card:#102430;
+    --wash:#123842;--teal:#4fd4ea;--mag:#ff4d8d;--cyan:#7eebf7;
+    --head:"Chakra Petch","Segoe UI",system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+    --ui:"Segoe UI","Helvetica Neue",system-ui,sans-serif;
+    --ps:#1e1e1e;--ps2:#141414;--ps3:#2a2a2a;--ps4:#323232;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{color-scheme:dark}
+  html,body{height:100%;background:var(--paper);color:var(--ink)}
+  body{font-family:var(--head);-webkit-font-smoothing:antialiased;overflow:hidden}
+  body::before{
+    content:"";position:fixed;inset:-10%;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(880px 520px at 0% 0%, rgba(0,194,216,.34) 0%, transparent 62%),
+      radial-gradient(720px 480px at 100% 100%, rgba(224,18,106,.26) 0%, transparent 58%),
+      linear-gradient(165deg,#07141c,#0c1c28 55%,#140e16);
+    animation:drift 28s ease-in-out infinite alternate;
+  }
+  body::after{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:
+      linear-gradient(rgba(0,151,178,.16) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,151,178,.16) 1px, transparent 1px),
+      linear-gradient(rgba(224,18,106,.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(224,18,106,.08) 1px, transparent 1px);
+    background-size:48px 48px,48px 48px,144px 144px,144px 144px;
+    animation:drift 36s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes drift{from{transform:translate3d(0,0,0)}to{transform:translate3d(-2.2%,-1.4%,0)}}
+  .hud{position:fixed;z-index:10;top:18px;left:18px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--teal);text-transform:uppercase;background:rgba(7,20,28,.92);padding:6px 10px;border:1px solid var(--line);clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+  .hud a{color:inherit;text-decoration:none}
+  .hud a:hover{color:var(--mag)}
+  .nav button:focus-visible,.dots button:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
+  .deck{height:100%;height:100svh;position:relative;z-index:1}
+  .slide{position:absolute;inset:0;display:grid;grid-template-columns:minmax(260px,440px) minmax(0,1fr);align-items:center;gap:4vw;padding:12vh 5vw 14vh 6vw;opacity:0;visibility:hidden;pointer-events:none}
+  .slide.on{opacity:1;visibility:visible;pointer-events:auto}
+  .slide.title{grid-template-columns:1fr;padding-left:11vw;overflow:hidden}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;color:var(--teal);text-transform:uppercase;margin-bottom:14px}
+  .kicker::before{content:"// ";color:var(--mag)}
+  h1{font-size:clamp(2.4rem,5vw,4.4rem);font-weight:700;line-height:1.02;max-width:14ch}
+  h2{font-size:clamp(1.7rem,3vw,2.5rem);font-weight:700;line-height:1.1;margin-bottom:12px;max-width:16ch}
+  h1 em,h2 em,.close em{font-style:normal;color:var(--mag);text-shadow:2px 0 0 rgba(0,194,216,.35)}
+  .deckline{margin-top:16px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal)}
+  .lead,.copy p{max-width:38em;font-size:clamp(1rem,1.25vw,1.12rem);font-weight:400;line-height:1.6;color:var(--muted)}
+  .copy .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:400;color:var(--teal)}
+  .copy .deckline,.copy .hint{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:400;color:var(--teal)}
+  .copy .close{font-size:clamp(1.35rem,2.2vw,1.8rem);font-weight:700;line-height:1.2;color:var(--ink)}
+  #stage4.run[data-face="pc"] .lay.curves{animation:fade .35s ease .65s both}
+  .lead{margin-top:22px}
+  .hint{margin-top:26px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--teal)}
+  .copy p b{color:var(--ink);font-weight:600}
+  .close{margin-top:18px;font-size:clamp(1.35rem,2.2vw,1.8rem);font-weight:700;line-height:1.2;color:var(--ink)}
+  .copy{position:relative;z-index:1}
+  figure{min-width:0;position:relative;z-index:1}
+  figcaption{margin-top:14px;font-family:var(--mono);font-size:12px;line-height:1.45;color:var(--muted);max-width:46em}
+  .nav{position:fixed;z-index:20;left:50%;bottom:22px;transform:translateX(-50%);display:flex;align-items:center;gap:12px}
+  .legal-links{position:fixed;z-index:20;right:12px;bottom:10px;font:11px/1.4 system-ui,sans-serif;background:rgba(7,20,28,.92);padding:4px 8px;border-radius:4px}
+  .legal-links a{color:inherit;text-decoration:none}
+  .nav>button{width:38px;height:38px;padding:0;font-family:var(--mono);font-size:18px;letter-spacing:.12em;color:var(--ink);background:var(--card);border:1px solid var(--teal);cursor:pointer;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+  .dots{display:flex;gap:8px}
+  .dots button{width:8px;height:8px;padding:0;border-radius:0;transform:rotate(45deg);border:1px solid var(--teal);background:transparent;cursor:pointer}
+  .dots button.on{background:var(--teal)}
+  .now{font-family:var(--mono);font-size:.95rem;line-height:1.4;color:var(--ink);min-height:2.8em;margin-bottom:12px;font-weight:500;border-left:3px solid var(--cyan);padding-left:10px}
+  .floaters{position:absolute;inset:0;pointer-events:none;z-index:0}
+  .floater{position:absolute;width:220px;animation:floaty 8s ease-in-out infinite alternate}
+  .floater:nth-child(1){right:8%;top:14%}
+  .floater:nth-child(2){right:20%;top:42%;animation-delay:-3s}
+  .floater:nth-child(3){right:7%;bottom:16%;animation-delay:-5s}
+  @keyframes floaty{from{transform:translateY(0) rotate(-2deg)}to{transform:translateY(-16px) rotate(2deg)}}
+  .win{background:#1b1b1b;color:#e6e6e6;border:1px solid #3a3a3a;overflow:hidden;font-family:var(--ui);font-size:11px;line-height:1.35;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);box-shadow:4px 4px 0 rgba(0,151,178,.45)}
+  .floater .win{box-shadow:0 14px 30px rgba(0,0,0,.55);min-height:0}
+  .bar{height:26px;display:flex;align-items:center;gap:8px;padding:0 8px;background:#141414;color:#eee;font-weight:650}
+  .bar b{font-weight:650;letter-spacing:.01em}
+  .lights{display:flex;gap:4px}
+  .lights i{width:8px;height:8px;border-radius:50%;display:block}
+  .lights i:nth-child(1){background:#ff5f57}
+  .lights i:nth-child(2){background:#febc2e}
+  .lights i:nth-child(3){background:#28c840}
+  .ico{width:15px;height:15px;display:block}
+  .tools{display:flex;flex-direction:column;gap:2px;padding:4px;background:#252526}
+  .tool{width:26px;height:26px;display:grid;place-items:center;color:#d0d0d0;border-radius:3px}
+  .tool.on{background:#094771;color:#fff;box-shadow:inset 0 0 0 1px #0078d4}
+  .vc .tool.on{background:#ff9a00;color:#1a1a1a;box-shadow:none}
+  .opts{height:28px;display:flex;align-items:center;gap:14px;padding:0 10px;background:#2d2d2d;color:#c8c8c8;font-size:10px}
+  .opts u{text-decoration:none;border:1px solid #555;padding:1px 6px;border-radius:2px;color:#eee}
+  .pcgrid{display:grid;grid-template-columns:34px 1fr 112px;grid-template-rows:26px 28px minmax(168px,1fr);min-height:280px;background:#1e1e1e}
+  .pcgrid .bar{grid-column:1 / -1}
+  .pcgrid .tools{grid-column:1;grid-row:2 / span 2}
+  .pcgrid .opts{grid-column:2 / -1;grid-row:2}
+  .stage{grid-column:2;grid-row:3;background:#3a3a3a;display:grid;place-items:center;padding:12px;min-width:0}
+  .doc{width:100%;height:100%;min-height:140px;position:relative;overflow:hidden;background:
+    linear-gradient(45deg,#cfcfcf 25%,transparent 25%),linear-gradient(-45deg,#cfcfcf 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#cfcfcf 75%),linear-gradient(-45deg,transparent 75%,#cfcfcf 75%);
+    background-size:14px 14px;background-position:0 0,0 7px,7px -7px,-7px 0;background-color:#f2f2f2}
+  .scene{width:100%;height:100%;display:block}
+  .side{grid-column:3;grid-row:3;background:#252526;border-left:1px solid #111;padding:6px;display:flex;flex-direction:column;gap:6px;min-width:0}
+  .panel h3{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#bbb;font-weight:650;margin-bottom:4px}
+  .hist{height:36px;display:flex;align-items:flex-end;gap:2px;background:#1a1a1a;padding:4px}
+  .hist i{flex:1;height:var(--h);background:linear-gradient(#9ad,#fff);transform-origin:bottom;transform:scaleY(1)}
+  .layers{list-style:none;display:flex;flex-direction:column;gap:2px}
+  .layers li{display:grid;grid-template-columns:12px 16px 1fr;gap:4px;align-items:center;padding:3px 4px;background:#2a2a2a;color:#ddd}
+  .layers li.on{background:#094771;color:#fff}
+  .layers li.hide{display:none}
+  .eye{width:8px;height:8px;border:1px solid #aaa;border-radius:50%}
+  .thumb{width:16px;height:12px;background:#555;border:1px solid #111}
+  .thumb.sky{background:linear-gradient(#163056,#c46b3c)}
+  .thumb.curve{background:#1a1a1a;position:relative}
+  .thumb.curve::after{content:"";position:absolute;left:1px;right:1px;top:7px;height:1px;background:#7ee;transform:rotate(-18deg)}
+  .thumb.type{background:#111;color:#fff;font-size:8px;line-height:12px;text-align:center;font-family:var(--mono)}
+  .pc.show-curves .lay.curves{display:grid}
+  .pc.show-type .lay.type{display:grid}
+  .lay.curves,.lay.type{display:none}
+  .pc.show-scene .doc{background:#14161c}
+  .pc.show-scene .doc .scene{display:block}
+  .doc .scene.built{display:none}
+  .pc.show-scene .doc .scene.built{display:block}
+  .emptycap{position:absolute;inset:0;display:grid;place-items:center;color:#666;font-family:var(--mono);font-size:10px;letter-spacing:.14em}
+  .pc.show-scene .emptycap{display:none}
+  .split{display:grid;grid-template-columns:minmax(150px,190px) minmax(0,1fr);gap:14px;align-items:center}
+  .notes{display:grid;gap:8px}
+  .note{background:var(--card);border:1px solid var(--line);padding:8px 10px;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);opacity:0;transform:translateY(10px)}
+  .note.in{opacity:1;transform:none;transition:opacity .4s ease,transform .4s ease}
+  .note b{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
+  .note span{display:block;margin-top:3px;color:var(--ink);font-size:.92rem}
+  .stagebox{min-height:300px}
+  .stagebox>.face{display:none;min-height:300px}
+  #tools[data-face="cursor"]>.face.cursor{display:grid}
+  #stage4[data-face="cursor"]>.face.cursor{display:block}
+  #tools[data-face="claude"]>.face.claude{display:flex}
+  #tools[data-face="oc"]>.face.oc{display:flex}
+  #stage4[data-face="pc"]>.face.pc,#stage4[data-face="vc"]>.face.vc,#stage4[data-face="dc"]>.face.dc{display:block}
+  #stage4 .mark{stroke-dasharray:1}
+  .floater .scene{height:96px}
+  .cursor{display:grid;grid-template-columns:36px 112px minmax(0,1fr) minmax(150px,220px);grid-template-rows:26px minmax(200px,1fr);background:#1e1e1e;min-height:300px;width:100%}
+  .cursor>.bar{grid-column:1 / -1;grid-row:1}
+  .cursor>.act{grid-column:1;grid-row:2}
+  .cursor>.files{grid-column:2;grid-row:2}
+  .cursor>.editor{grid-column:3;grid-row:2}
+  .cursor>.agent{grid-column:4;grid-row:2}
+  .act{grid-row:2;background:#181818;display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:8px}
+  .act i{width:16px;height:16px;border:1.5px solid #858585;border-radius:3px}
+  .act i.on{border-color:#3794ff;background:#3794ff}
+  .files{grid-row:2;background:#181818;border-right:1px solid #111;padding:8px 8px;color:#ccc}
+  .files b{display:block;font-size:10px;letter-spacing:.08em;color:#bbb;margin-bottom:6px}
+  .files span{display:block;padding:3px 4px;border-radius:3px}
+  .files .on{background:#094771;color:#fff}
+  .editor{grid-row:2;background:#1e1e1e;min-width:0;padding:0}
+  .tab{height:26px;display:flex;align-items:center;padding:0 10px;background:#1e1e1e;color:#fff;border-top:1px solid #3794ff;border-right:1px solid #111;width:max-content;font-size:11px}
+  .editor pre{padding:10px 12px;color:#d4d4d4;font-family:var(--mono);font-size:11px;line-height:1.55;white-space:pre-wrap}
+  .editor .cm{color:#6a9955}
+  .agent{grid-row:2;background:#181818;border-left:1px solid #111;padding:8px;display:flex;flex-direction:column;gap:8px}
+  .agent .who{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#3794ff}
+  .bubble,.claude .you,.claude .ai,.oc .term,.agent{min-width:0}
+  .bubble,.claude .you,.oc .term{overflow-wrap:anywhere}
+  .bubble{background:#252526;border:1px solid #333;padding:6px 8px;color:#eee;min-height:2.6em}
+  #tools>.face{width:100%}
+  .follow{color:#9cdcfe;font-size:11px;opacity:0}
+  .follow.show{opacity:1}
+  .caret{display:inline-block;width:7px;height:.9em;background:#fff;margin-left:1px;vertical-align:-1px;animation:blink 1s steps(1) infinite}
+  .caret.off{display:none}
+  @keyframes blink{50%{opacity:0}}
+  .claude{flex-direction:column;background:#26241f;color:#f3efe6;min-height:300px}
+  .claude .bar{background:#1c1b17;color:#f3efe6}
+  .claude .log{padding:12px;display:flex;flex-direction:column;gap:10px;flex:1}
+  .claude .you{align-self:flex-end;max-width:92%;background:#3a342c;padding:8px 10px;border-radius:8px}
+  .claude .ai{max-width:92%}
+  .claude .nm{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#e8a087;margin-bottom:3px}
+  .claude .you .nm{color:#a39890;text-align:right}
+  .oc{flex-direction:column;background:#0b0b0d;color:#e8e8ee;font-family:var(--mono);min-height:300px}
+  .oc .bar{background:#0b0b0d;border-bottom:1px solid #222;color:#c4b5fd}
+  .oc .term{padding:12px;font-size:12px;line-height:1.6;flex:1}
+  .oc .pr{color:#c4b5fd}
+  .oc .dim{color:#8a8a93}
+  .toolrow{display:flex;gap:8px;align-items:center;background:#094771;color:#fff;padding:6px 8px;font-family:var(--mono);font-size:11px}
+  .toolrow i{width:8px;height:8px;border-radius:50%;background:#7ee787;flex:none}
+  .vcgrid{display:grid;grid-template-columns:34px 1fr 118px;grid-template-rows:26px 28px minmax(168px,1fr);min-height:300px;background:#1e1e1e}
+  .vcgrid .bar{grid-column:1 / -1}
+  .vcgrid .tools{grid-column:1;grid-row:2 / span 2}
+  .vcgrid .opts{grid-column:2 / -1;grid-row:2}
+  .paste{grid-column:2;grid-row:3;background:#2a2a2a;display:grid;place-items:center;padding:16px}
+  .board{width:min(100%,280px);height:78%;background:#fff;box-shadow:0 0 0 1px #111,0 8px 20px rgba(0,0,0,.35);position:relative}
+  .board svg{width:100%;height:100%}
+  .appear{grid-column:3;grid-row:3;background:#252526;border-left:1px solid #111;padding:8px;color:#ddd}
+  .appear h3{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#ff9a00;margin-bottom:6px}
+  .appear p{display:flex;justify-content:space-between;gap:6px;padding:4px 0;border-top:1px solid #3a3a3a;font-family:var(--mono);font-size:10px}
+  .swatch{width:12px;height:12px;background:#1a1a1a;border:1px solid #fff;display:inline-block}
+  .dc{display:flex;flex-direction:column;min-height:300px;background:#3a3a3a}
+  .dc .bar{background:#2b2b2b}
+  .desk{flex:1;display:grid;place-items:center;padding:14px;background:
+    linear-gradient(#4a4a4a,#3a3a3a)}
+  .spread{width:min(100%,520px);display:grid;grid-template-columns:1fr 1fr;gap:10px;filter:drop-shadow(0 10px 16px rgba(0,0,0,.35))}
+  .page{background:#f7f4ee;color:#1c1c1c;min-height:190px;padding:14px 12px;position:relative}
+  .page::before{content:"";position:absolute;inset:8px;border:1px solid rgba(232,90,173,.55);pointer-events:none}
+  .headline{font-family:var(--head);font-weight:700;letter-spacing:.14em;font-size:18px;margin:6px 4px 8px}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 4px}
+  .cols i{display:block;height:3px;margin:0 0 5px;background:#d9d3c8}
+  .frame{margin:8px 4px;height:120px;background:#14161c;border:1px solid #1c1c1c;overflow:hidden}
+  .frame .scene{height:120px}
+  .dock{margin-top:8px;background:#181818;border:1px solid #333;padding:8px 10px;display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:start}
+  .dock b{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:#3794ff}
+  .dock p{color:#eee;font-family:var(--mono);font-size:12px;min-height:1.4em}
+  .scene .word{font-family:var(--mono);font-size:11px;letter-spacing:.18em;fill:#f4efe6}
+  .markg{transform-origin:37px 98px;transition:transform .9s cubic-bezier(.2,.7,.2,1)}
+  .scene.near .markg{transform:translate(70px,8px) scale(1.9)}
+  .scene.far .markg{transform:none}
+  #stage4 .sky,#stage4 .ground,#stage4 .horizon,#stage4 .sun,#stage4 .glow,#stage4 .anchors,#stage4 .frame .scene,#stage4 .headline{opacity:1}
+  #stage4.run[data-face="pc"] .sky,#stage4.run[data-face="pc"] .ground{animation:fade .4s ease both}
+  #stage4.run[data-face="pc"] .horizon{transform-origin:left center;animation:growX .7s ease .12s both}
+  #stage4.run[data-face="pc"] .sun,#stage4.run[data-face="pc"] .glow{animation:fade .45s ease .45s both}
+  #stage4.run[data-face="pc"] .hist i{animation:rise .45s ease .2s both;transform-origin:bottom}
+  #stage4.run[data-face="vc"] .mark{animation:draw 1.2s ease both}
+  #stage4.run[data-face="vc"] .anchors{animation:fade .3s ease .25s both}
+  #stage4.run[data-face="dc"] .frame .scene{animation:fade .6s ease .2s both}
+  #stage4.run[data-face="dc"] .headline{animation:fade .4s ease .55s both}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes growX{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  @keyframes rise{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+  @keyframes draw{from{stroke-dashoffset:1;fill:transparent}65%{stroke-dashoffset:0;fill:transparent}to{stroke-dashoffset:0;fill:#1a1a1a}}
+  @media (max-width:860px){
+    .hud{top:max(10px,env(safe-area-inset-top));left:12px;max-width:calc(100% - 24px);letter-spacing:.08em;font-size:10px}
+    .slide,.slide.title{grid-template-columns:1fr;align-content:start;padding:64px 16px calc(92px + env(safe-area-inset-bottom));gap:12px;overflow:auto}
+    .floaters{display:none}
+    h1{font-size:2.05rem;max-width:none}
+    h2{font-size:1.35rem;max-width:none}
+    figure{display:flex;flex-direction:column}
+    figure .now{order:0}
+    figcaption{order:1;margin:0 0 10px}
+    figure .split,figure .stagebox,figure>.win,figure .dock{order:2}
+    .split{grid-template-columns:1fr}
+    .pcgrid,.vcgrid{grid-template-columns:28px 1fr 92px}
+    .cursor{grid-template-columns:28px minmax(0,1fr);grid-template-rows:26px auto auto}
+    .files{display:none}
+    .cursor>.act{grid-column:1;grid-row:2 / span 2}
+    .cursor>.editor{grid-column:2;grid-row:2}
+    .cursor>.agent{grid-column:1 / -1;grid-row:3}
+    .layers li{grid-template-columns:10px 1fr;font-size:10px}
+    .thumb{display:none}
+    .legal-links{bottom:64px}
+    .deck::after{content:"";position:fixed;z-index:9;top:0;left:0;right:0;height:calc(52px + env(safe-area-inset-top));pointer-events:none;background:linear-gradient(var(--paper) 62%, rgba(7,20,28,0))}
+    .nav{bottom:max(10px,env(safe-area-inset-bottom));gap:6px}
+    .nav>button{width:44px;height:44px}
+    .dots{gap:2px}
+    .dots button{width:36px;height:36px;border-color:transparent;background:transparent;transform:none}
+    .dots button::before{content:"";display:block;width:8px;height:8px;margin:13px auto 0;transform:rotate(45deg);border:1px solid var(--teal);background:transparent}
+    .dots button.on{background:transparent}
+    .dots button.on::before{background:var(--teal)}
+    .now{min-height:0}
+  }
+  @media (prefers-reduced-motion:reduce){
+    body::before,body::after,.floater,.note,.markg,.caret{animation:none !important;transition:none !important}
+    #stage4.run[data-face] .sky,#stage4.run[data-face] .ground,#stage4.run[data-face] .horizon,
+    #stage4.run[data-face] .sun,#stage4.run[data-face] .glow,#stage4.run[data-face] .hist i,
+    #stage4.run[data-face] .mark,#stage4.run[data-face] .anchors,#stage4.run[data-face] .frame .scene,
+    #stage4.run[data-face] .headline{animation:none !important}
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" hidden>
+  <symbol id="i-move" viewBox="0 0 16 16"><path d="M8 1.5v13M1.5 8h13M8 1.5L6 3.5M8 1.5l2 2M8 14.5L6 12.5M8 14.5l2-2M1.5 8L3.5 6M1.5 8l2 2M14.5 8L12.5 6M14.5 8l-2 2" fill="none" stroke="currentColor" stroke-width="1.2"/></symbol>
+  <symbol id="i-marquee" viewBox="0 0 16 16"><rect x="2.5" y="2.5" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="2 1.4"/></symbol>
+  <symbol id="i-lasso" viewBox="0 0 16 16"><path d="M3 10.5c.2-4 2.8-7 6-6.2 2.6.6 3.8 3 3 5.6-.9 2.8-4 3.6-6.1 2.2" fill="none" stroke="currentColor" stroke-width="1.2"/></symbol>
+  <symbol id="i-brush" viewBox="0 0 16 16"><path d="M3 13.2c1.8-.6 2.6-3.2 3.6-6.2L12.2 2.4l1.4 1.4-5.4 4.8c-2.4.8-4.4 2.2-5.2 4.6z" fill="currentColor"/></symbol>
+  <symbol id="i-type" viewBox="0 0 16 16"><path d="M3 3.2h10M8 3.2v9.6M5.2 12.8h5.6" fill="none" stroke="currentColor" stroke-width="1.3"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 16 16"><path d="M2.2 13.8l3-1.1L13.2 3.6 12.4 2.2 4.2 11.2z" fill="currentColor"/></symbol>
+  <symbol id="i-select" viewBox="0 0 16 16"><path d="M3 2.2l7.6 5.6-3 .5L9.8 13l-1.5.7-2-3.8L3.2 11z" fill="currentColor"/></symbol>
+  <symbol id="i-frame" viewBox="0 0 16 16"><rect x="2.2" y="3" width="11.6" height="10" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M2.4 11.2l3.2-2.8 2.3 1.8 1.8-2L13.6 11" fill="none" stroke="currentColor" stroke-width="1.1"/></symbol>
+</svg>
+
+<div class="hud"><a href="../index.html">Concepts</a> · <span id="hudIdx">01 / 05</span></div>
+
+<main class="deck" id="deck">
+  <section class="slide title on">
+    <div class="floaters" aria-hidden="true">
+      <div class="floater"><div class="win mini pc">
+        <div class="bar"><span class="lights"><i></i><i></i><i></i></span><b>PhotoCraft</b></div>
+        <svg class="scene" viewBox="0 0 240 130"><rect width="240" height="130" fill="url(#gF)"/><rect y="86" width="240" height="44" fill="#14161c"/><line x1="0" y1="86" x2="240" y2="86" stroke="#f2d3b0"/><circle cx="170" cy="60" r="22" fill="#ffb15a" opacity=".3"/><circle cx="170" cy="60" r="11" fill="#ffe0b0"/></svg>
+      </div></div>
+      <div class="floater"><div class="win mini vc">
+        <div class="bar"><span class="lights"><i></i><i></i><i></i></span><b>VectorCraft</b></div>
+        <div class="paste" style="height:108px"><div class="board" style="height:86px"><svg viewBox="0 0 240 150"><path d="M108 120 L120 38 L132 120 Z" fill="#1a1a1a"/></svg></div></div>
+      </div></div>
+      <div class="floater"><div class="win mini oc">
+        <div class="bar"><span class="lights"><i></i><i></i><i></i></span><b>OpenCode</b></div>
+        <div class="term" style="padding:10px;font-family:var(--mono);font-size:11px;background:#0b0b0d;color:#e8e8ee"><div style="color:#c4b5fd">› <span data-i18n="sentenceShort">Horizont tief.</span></div><div style="color:#8a8a93">mcp · photocraft</div></div>
+      </div></div>
+    </div>
+    <div class="copy">
+      <p class="kicker" data-i18n="kicker">Konzept</p>
+      <h1 data-i18n-html="h1">KI-gestützte menschliche <em>Kunst</em></h1>
+      <p class="deckline" data-i18n="deck">Konzept, dann Handwerk</p>
+      <p class="lead" data-i18n="lead">Ein Bild beginnt nicht im Modell. Es beginnt als Idee: was zu sehen ist, für wen, und was wegbleibt. Die Maschine kann das ausführen. Die Idee gibt sie nicht.</p>
+      <p class="hint" data-i18n="hint">Pfeiltasten oder die Pfeile unten</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="copy">
+      <p class="kicker" data-i18n="s2k">02 — Die Idee</p>
+      <h2 data-i18n-html="s2h">Die Idee <em>bleibt</em> beim Menschen.</h2>
+      <p data-i18n-html="s2p">Bevor etwas gezeichnet wird, steht der Begriff fest. Motiv, Stimmung, was weggelassen wird. <b>ArtCraft bekommt diese Entscheidung.</b> Es erfindet sie nicht.</p>
+    </div>
+    <figure>
+      <p class="now" id="now2"></p>
+      <div class="split">
+        <div class="notes" id="notes2">
+          <div class="note"><b data-i18n="motif">Motiv</b><span data-i18n="noteMotif">Horizont tief, Sonne als Scheibe</span></div>
+          <div class="note"><b data-i18n="mood">Stimmung</b><span data-i18n="noteMood">Warm, weit, still</span></div>
+          <div class="note"><b data-i18n="omit">Weglassen</b><span data-i18n="noteOmit">Kein Detail, der Raum bleibt leer</span></div>
+        </div>
+        <div class="win pc" id="pc2">
+          <div class="pcgrid">
+            <div class="bar"><span class="lights"><i></i><i></i><i></i></span><b>PhotoCraft</b><span>untitled</span></div>
+            <div class="tools">
+              <span class="tool on"><svg class="ico"><use href="#i-move"/></svg></span>
+              <span class="tool"><svg class="ico"><use href="#i-marquee"/></svg></span>
+              <span class="tool"><svg class="ico"><use href="#i-lasso"/></svg></span>
+              <span class="tool"><svg class="ico"><use href="#i-brush"/></svg></span>
+              <span class="tool"><svg class="ico"><use href="#i-type"/></svg></span>
+              <span class="tool"><svg class="ico"><use href="#i-pen"/></svg></span>
+            </div>
+            <div class="opts"><span>Size <u>24 px</u></span><span>Opacity <u>100%</u></span></div>
+            <div class="stage"><div class="doc"><span class="emptycap">RGB / 8</span></div></div>
+            <div class="side">
+              <div class="panel"><h3>Layers</h3>
+                <ul class="layers"><li class="on"><i class="eye"></i><i class="thumb"></i><span>Background</span></li></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <figcaption data-i18n="s2cap">Die Leinwand bleibt leer, bis Motiv, Stimmung und Weglassen dastehen.</figcaption>
+    </figure>
+  </section>
+
+  <section class="slide">
+    <div class="copy">
+      <p class="kicker" data-i18n="s3k">03 — Das Gespräch</p>
+      <h2 data-i18n-html="s3h">Du sprichst mit dem <em>Werkzeug.</em></h2>
+      <p data-i18n-html="s3p">Cursor, Claude oder OpenCode ist das Gespräch. Du sagst das Konzept in Sätzen. Das Werkzeug sieht das Projekt und kann nachfragen. <b>Es malt nicht.</b></p>
+    </div>
+    <figure>
+      <p class="now" id="now3"></p>
+      <div class="stagebox win" id="tools" data-face="cursor">
+        <div class="face cursor">
+          <div class="bar"><span class="lights"><i></i><i></i><i></i></span><b>Cursor</b></div>
+          <div class="act"><i class="on"></i><i></i><i></i></div>
+          <div class="files"><b>EXPLORER</b><span class="on" data-i18n="file">konzept.md</span><span>room.png</span></div>
+          <div class="editor"><div class="tab" data-i18n="file">konzept.md</div><pre><span class="cm"># </span><span data-i18n="motif">Motiv</span>
+<span data-i18n="noteMotif">Horizont tief, Sonne als Scheibe</span></pre></div>
+          <div class="agent"><div class="who">Agent</div><div class="bubble"><span id="say3"></span><i class="caret" id="caret3"></i></div><p class="follow" id="follow3" data-i18n="follow">Was soll wegbleiben?</p></div>
+        </div>
+        <div class="face claude">
+          <div class="bar"><span class="lights"><i></i><i></i><i></i></span><b>Claude Code</b></div>
+          <div class="log">
+            <div class="you"><span class="nm">You</span><span id="say3b"></span><i class="caret" id="caret3b"></i></div>
+            <div class="ai"><span class="nm">Claude</span><p class="follow" id="follow3b" data-i18n="follow">Was soll wegbleiben?</p></div>
+          </div>
+        </div>
+        <div class="face oc">
+          <div class="bar"><span class="lights"><i></i><i></i><i></i></span><b>OpenCode</b></div>
+          <div class="term"><div class="dim">build · <span data-i18n="file">konzept.md</span></div><div><span class="pr">› </span><span id="say3c"></span><i class="caret" id="caret3c"></i></div><p class="follow dim" id="follow3c" data-i18n="follow">Was soll wegbleiben?</p></div>
+        </div>
+      </div>
+      <figcaption data-i18n="s3cap">Derselbe Satz, drei Werkzeuge. Die Leinwand ändert sich nicht.</figcaption>
+    </figure>
+  </section>
+
+  <section class="slide">
+    <div class="copy">
+      <p class="kicker" data-i18n="s4k">04 — Die Leitung</p>
+      <h2 data-i18n-html="s4h">MCP ist die <em>Leitung.</em></h2>
+      <p data-i18n-html="s4p">Der MCP-Server legt offen, was das Programm schon kann: eine Fläche anlegen, einen Pfad ziehen, ein Bild setzen, exportieren. Das Werkzeug ruft das auf. PhotoCraft, VectorCraft oder DesignCraft führt es aus. <b>Die Datei bleibt bei dir.</b></p>
+    </div>
+    <figure>
+      <p class="now" id="now4"></p>
+      <div class="stagebox" id="stage4" data-face="cursor">
+        <div class="face cursor win">
+          <div class="cursor">
+            <div class="bar"><span class="lights"><i></i><i></i><i></i></span><b>Cursor</b></div>
+            <div class="act"><i class="on"></i><i></i></div>
+            <div class="files"><b>EXPLORER</b><span class="on" data-i18n="file">konzept.md</span></div>
+            <div class="editor"><div class="tab" data-i18n="file">konzept.md</div><pre><span class="cm"># </span><span data-i18n="motif">Motiv</span></pre></div>
+            <div class="agent"><div class="who">Agent</div>
+              <div class="toolrow"><i></i><div><b>PhotoCraft</b><div id="call4">Horizont setzen</div></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="face pc win show-scene show-curves">
+          <div class="pcgrid">
+            <div class="bar"><span class="lights"><i></i><i></i><i></i></span><b>PhotoCraft</b></div>
+            <div class="tools">
+              <span class="tool"><svg class="ico"><use href="#i-move"/></svg></span>
+              <span class="tool"><svg class="ico"><use href="#i-marquee"/></svg></span>
+              <span class="tool on"><svg class="ico"><use href="#i-brush"/></svg></span>
+              <span class="tool"><svg class="ico"><use href="#i-type"/></svg></span>
+            </div>
+            <div class="opts"><span>Brush <u>24 px</u></span><span>Opacity <u>100%</u></span></div>
+            <div class="stage"><div class="doc"><svg class="scene built" viewBox="0 0 240 150">
+              <defs><linearGradient id="gP" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#163056"/><stop offset=".72" stop-color="#c46b3c"/><stop offset="1" stop-color="#e7a15a"/></linearGradient></defs>
+              <rect class="sky" width="240" height="150" fill="url(#gP)"/>
+              <rect class="ground" y="98" width="240" height="52" fill="#14161c"/>
+              <line class="horizon" x1="0" y1="98" x2="240" y2="98" stroke="#f2d3b0" stroke-width="1.4"/>
+              <circle class="glow" cx="168" cy="70" r="28" fill="#ffb15a" opacity=".3"/>
+              <circle class="sun" cx="168" cy="70" r="13" fill="#ffe0b0"/>
+            </svg></div></div>
+            <div class="side">
+              <div class="panel"><h3>Histogram</h3><div class="hist"><i style="--h:30%"></i><i style="--h:55%"></i><i style="--h:80%"></i><i style="--h:62%"></i><i style="--h:40%"></i><i style="--h:70%"></i><i style="--h:34%"></i></div></div>
+              <div class="panel"><h3>Layers</h3><ul class="layers">
+                <li class="lay curves on"><i class="eye"></i><i class="thumb curve"></i><span>Curves</span></li>
+                <li><i class="eye"></i><i class="thumb sky"></i><span>Background</span></li>
+              </ul></div>
+            </div>
+          </div>
+        </div>
+        <div class="face vc win">
+          <div class="vcgrid">
+            <div class="bar"><span class="lights"><i></i><i></i><i></i></span><b>VectorCraft</b></div>
+            <div class="tools">
+              <span class="tool"><svg class="ico"><use href="#i-select"/></svg></span>
+              <span class="tool on"><svg class="ico"><use href="#i-pen"/></svg></span>
+              <span class="tool"><svg class="ico"><use href="#i-type"/></svg></span>
+            </div>
+            <div class="opts"><span>Stroke <u>2 pt</u></span><span>Fill <u>#1a1a1a</u></span></div>
+            <div class="paste"><div class="board"><svg viewBox="0 0 240 150">
+              <path class="mark" pathLength="1" d="M108 122 L120 36 L132 122 Z" fill="#1a1a1a" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/>
+              <g class="anchors" fill="#fff" stroke="#ff9a00" stroke-width="1.6"><rect x="105" y="119" width="6" height="6"/><rect x="117" y="33" width="6" height="6"/><rect x="129" y="119" width="6" height="6"/></g>
+            </svg></div></div>
+            <div class="appear"><h3>Appearance</h3><p><span>Fill</span><span><i class="swatch"></i> #1a1a1a</span></p><p><span>Stroke</span><span>2 pt</span></p><p><span>Opacity</span><span>100%</span></p></div>
+          </div>
+        </div>
+        <div class="face dc win">
+          <div class="dc">
+            <div class="bar"><span class="lights"><i></i><i></i><i></i></span><b>DesignCraft</b></div>
+            <div class="opts"><span class="tool on" style="width:22px;height:22px"><svg class="ico"><use href="#i-frame"/></svg></span><span class="tool" style="width:22px;height:22px"><svg class="ico"><use href="#i-type"/></svg></span><span>A4 · spread</span></div>
+            <div class="desk"><div class="spread">
+              <div class="page"><div class="headline" data-i18n="word">RAUM</div><div class="cols"><div><i></i><i></i><i></i><i></i><i></i></div><div><i></i><i></i><i></i><i></i></div></div></div>
+              <div class="page"><div class="frame"><svg class="scene" viewBox="0 0 240 150">
+                <defs><linearGradient id="gD" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#163056"/><stop offset=".72" stop-color="#c46b3c"/><stop offset="1" stop-color="#e7a15a"/></linearGradient></defs>
+                <rect width="240" height="150" fill="url(#gD)"/>
+                <rect y="98" width="240" height="52" fill="#14161c"/>
+                <line x1="0" y1="98" x2="240" y2="98" stroke="#f2d3b0"/>
+                <circle cx="168" cy="70" r="26" fill="#ffb15a" opacity=".28"/>
+                <circle cx="168" cy="70" r="12" fill="#ffe0b0"/>
+                <path d="M30 98 L37 48 L44 98 Z" fill="#f4efe6"/>
+              </svg></div></div>
+            </div></div>
+          </div>
+        </div>
+      </div>
+      <figcaption data-i18n="s4cap">Erst der Aufruf, dann die Fläche, der Pfad, zuletzt die Seite.</figcaption>
+    </figure>
+  </section>
+
+  <section class="slide">
+    <div class="copy">
+      <p class="kicker" data-i18n="s5k">05 — Die Korrektur</p>
+      <h2 data-i18n-html="s5h">Korrigiert wird die <em>Idee.</em></h2>
+      <p data-i18n-html="s5p">Das Bild kommt in den Chat zurück. Du benennst die Lücke im Konzept, keine Filtereinstellung. <b>Jede Runde schärft den Begriff.</b></p>
+      <p class="close" data-i18n-html="close">Die Kunst ist der Begriff. <em>Die Maschine ist das Handwerk.</em></p>
+    </div>
+    <figure>
+      <p class="now" id="now5"></p>
+      <div class="win pc show-scene show-curves show-type">
+        <div class="pcgrid">
+          <div class="bar"><span class="lights"><i></i><i></i><i></i></span><b>PhotoCraft</b></div>
+          <div class="tools">
+            <span class="tool on"><svg class="ico"><use href="#i-move"/></svg></span>
+            <span class="tool"><svg class="ico"><use href="#i-brush"/></svg></span>
+            <span class="tool"><svg class="ico"><use href="#i-type"/></svg></span>
+          </div>
+          <div class="opts"><span>Move</span></div>
+          <div class="stage"><div class="doc"><svg class="scene built near" id="scene5" viewBox="0 0 240 150">
+            <defs><linearGradient id="g5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#163056"/><stop offset=".72" stop-color="#c46b3c"/><stop offset="1" stop-color="#e7a15a"/></linearGradient></defs>
+            <rect width="240" height="150" fill="url(#g5)"/>
+            <rect y="98" width="240" height="52" fill="#14161c"/>
+            <line x1="0" y1="98" x2="240" y2="98" stroke="#f2d3b0"/>
+            <circle cx="168" cy="70" r="26" fill="#ffb15a" opacity=".28"/>
+            <circle cx="168" cy="70" r="12" fill="#ffe0b0"/>
+            <text class="word" x="14" y="22" data-i18n="word">RAUM</text>
+            <g class="markg"><path d="M30 98 L37 46 L44 98 Z" fill="#f4efe6"/></g>
+          </svg></div></div>
+          <div class="side">
+            <div class="panel"><h3>Layers</h3><ul class="layers">
+              <li class="lay type on"><i class="eye"></i><i class="thumb type">T</i><span>Type</span></li>
+              <li class="lay curves"><i class="eye"></i><i class="thumb curve"></i><span>Curves</span></li>
+              <li><i class="eye"></i><i class="thumb sky"></i><span>Background</span></li>
+            </ul></div>
+          </div>
+        </div>
+      </div>
+      <div class="dock"><b>Agent</b><p><span id="say5"></span><i class="caret" id="caret5"></i></p></div>
+      <figcaption data-i18n="s5cap">Die Figur war zu nah. Der Raum bleibt leer. Die Schrift bleibt.</figcaption>
+    </figure>
+  </section>
+</main>
+
+<nav class="nav" aria-label="Folien">
+  <button type="button" id="prev" aria-label="Vorherige Folie">‹</button>
+  <div class="dots" id="dots"></div>
+  <button type="button" id="next" aria-label="Nächste Folie">›</button>
+</nav>
+
+<svg width="0" height="0" hidden><defs><linearGradient id="gF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#163056"/><stop offset="1" stop-color="#c46b3c"/></linearGradient></defs></svg>
+
+<script>
+(() => {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const BEAT = 2200;
+  const copy = {
+    de: {
+      docTitle: 'Konzept – KI-gestützte menschliche Kunst',
+      kicker: 'Konzept', h1: 'KI-gestützte menschliche <em>Kunst</em>', deck: 'Konzept, dann Handwerk',
+      lead: 'Ein Bild beginnt nicht im Modell. Es beginnt als Idee: was zu sehen ist, für wen, und was wegbleibt. Die Maschine kann das ausführen. Die Idee gibt sie nicht.',
+      hint: 'Pfeiltasten oder die Pfeile unten',
+      s2k: '02 — Die Idee', s2h: 'Die Idee <em>bleibt</em> beim Menschen.',
+      s2p: 'Bevor etwas gezeichnet wird, steht der Begriff fest. Motiv, Stimmung, was weggelassen wird. <b>ArtCraft bekommt diese Entscheidung.</b> Es erfindet sie nicht.',
+      s2cap: 'Die Leinwand bleibt leer, bis Motiv, Stimmung und Weglassen dastehen.',
+      s3k: '03 — Das Gespräch', s3h: 'Du sprichst mit dem <em>Werkzeug.</em>',
+      s3p: 'Cursor, Claude oder OpenCode ist das Gespräch. Du sagst das Konzept in Sätzen. Das Werkzeug sieht das Projekt und kann nachfragen. <b>Es malt nicht.</b>',
+      s3cap: 'Derselbe Satz, drei Werkzeuge. Die Leinwand ändert sich nicht.',
+      s4k: '04 — Die Leitung', s4h: 'MCP ist die <em>Leitung.</em>',
+      s4p: 'Der MCP-Server legt offen, was das Programm schon kann: eine Fläche anlegen, einen Pfad ziehen, ein Bild setzen, exportieren. Das Werkzeug ruft das auf. PhotoCraft, VectorCraft oder DesignCraft führt es aus. <b>Die Datei bleibt bei dir.</b>',
+      s4cap: 'Erst der Aufruf, dann die Fläche, der Pfad, zuletzt die Seite.',
+      s5k: '05 — Die Korrektur', s5h: 'Korrigiert wird die <em>Idee.</em>',
+      s5p: 'Das Bild kommt in den Chat zurück. Du benennst die Lücke im Konzept, keine Filtereinstellung. <b>Jede Runde schärft den Begriff.</b>',
+      close: 'Die Kunst ist der Begriff. <em>Die Maschine ist das Handwerk.</em>',
+      s5cap: 'Die Figur war zu nah. Der Raum bleibt leer. Die Schrift bleibt.',
+      motif: 'Motiv', mood: 'Stimmung', omit: 'Weglassen',
+      noteMotif: 'Horizont tief, Sonne als Scheibe',
+      noteMood: 'Warm, weit, still',
+      noteOmit: 'Kein Detail, der Raum bleibt leer',
+      sentence: 'Horizont tief. Sonne als Scheibe. Die Figur klein, der Raum leer.',
+      sentenceShort: 'Horizont tief.',
+      fix: 'Die Figur ist zu nah. Der Raum bleibt leer.',
+      follow: 'Was soll wegbleiben?',
+      file: 'konzept.md', word: 'RAUM',
+      call: 'Horizont setzen',
+      s2now: [
+        'Noch ist nichts gezeichnet.',
+        'Das Motiv steht. Die Fläche bleibt leer.',
+        'Die Stimmung steht. Die Fläche bleibt leer.',
+        'Motiv, Stimmung, Weglassen. Nichts ist gezeichnet.'
+      ],
+      s3now: ['Cursor hört den Satz.', 'Claude Code hört denselben Satz.', 'OpenCode hört denselben Satz.'],
+      s4now: [
+        'Cursor ruft PhotoCraft. Die Fläche ist noch leer.',
+        'PhotoCraft setzt Horizont, Sonne und die Kurve.',
+        'VectorCraft zieht die Figur als Pfad.',
+        'DesignCraft setzt Bild und Titel auf die Seite.'
+      ],
+      s5now: [
+        'Die Figur steht zu nah.',
+        'Du korrigierst den Begriff, nicht einen Filter.',
+        'Die Figur ist klein. Der Raum bleibt leer.'
+      ],
+      prev: 'Vorherige Folie', next: 'Nächste Folie', goto: 'Folie', nav: 'Folien'
+    },
+    en: {
+      docTitle: 'Concept – AI powered human art',
+      kicker: 'Concept', h1: 'AI powered human <em>art</em>', deck: 'Concept, then craft',
+      lead: 'A picture does not start in the model. It starts as an idea: what is shown, for whom, and what is left out. The machine can carry that out. It does not supply the idea.',
+      hint: 'Arrow keys, or the arrows below',
+      s2k: '02 — The idea', s2h: 'The idea <em>stays</em> with the person.',
+      s2p: 'Before anything is drawn, the concept is fixed. Motif, mood, what is omitted. <b>ArtCraft receives that decision.</b> It does not invent it.',
+      s2cap: 'The canvas stays empty until motif, mood, and omission are set.',
+      s3k: '03 — The conversation', s3h: 'You talk to the <em>tool.</em>',
+      s3p: 'Cursor, Claude, or OpenCode is the conversation. You say the concept in sentences. The tool can see the project and ask a follow-up. <b>It does not paint.</b>',
+      s3cap: 'The same sentence, three tools. The canvas does not change.',
+      s4k: '04 — The line', s4h: 'MCP is the <em>line.</em>',
+      s4p: 'The MCP server offers what the app can already do: open a surface, draw a path, place a picture, export. The tool calls it. PhotoCraft, VectorCraft, or DesignCraft performs it. <b>The file stays with you.</b>',
+      s4cap: 'First the call, then the surface, the path, and last the page.',
+      s5k: '05 — The correction', s5h: 'What gets corrected is the <em>idea.</em>',
+      s5p: 'The picture comes back into the chat. You name the gap in the concept, not a filter setting. <b>Each round sharpens the concept.</b>',
+      close: 'The art is the concept. <em>The machine is the craft.</em>',
+      s5cap: 'The figure was too close. The room stays empty. The type stays.',
+      motif: 'Motif', mood: 'Mood', omit: 'Omission',
+      noteMotif: 'Horizon low, sun as a disc',
+      noteMood: 'Warm, wide, still',
+      noteOmit: 'No detail, the room stays empty',
+      sentence: 'Horizon low. Sun as a disc. The figure small, the room empty.',
+      sentenceShort: 'Horizon low.',
+      fix: 'The figure is too close. The room stays empty.',
+      follow: 'What should be left out?',
+      file: 'concept.md', word: 'ROOM',
+      call: 'place the horizon',
+      s2now: [
+        'Nothing has been drawn yet.',
+        'The motif is set. The canvas stays empty.',
+        'The mood is set. The canvas stays empty.',
+        'Motif, mood, omission. Nothing is drawn.'
+      ],
+      s3now: ['Cursor hears the sentence.', 'Claude Code hears the same sentence.', 'OpenCode hears the same sentence.'],
+      s4now: [
+        'Cursor calls PhotoCraft. The surface is still empty.',
+        'PhotoCraft sets the horizon, the sun, and the curve.',
+        'VectorCraft draws the figure as a path.',
+        'DesignCraft sets the picture and the title on the page.'
+      ],
+      s5now: [
+        'The figure stands too close.',
+        'You correct the concept, not a filter.',
+        'The figure is small. The room stays empty.'
+      ],
+      prev: 'Previous slide', next: 'Next slide', goto: 'Slide', nav: 'Slides'
+    }
+  };
+
+  const $ = (s) => document.querySelector(s);
+  let lang = 'de';
+  let index = 0;
+  let origin = 0;
+  let face4 = '';
+  const slides = [...document.querySelectorAll('.slide')];
+  const dotBtns = slides.map((_, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.addEventListener('click', () => show(i));
+    $('#dots').appendChild(b);
+    return b;
+  });
+
+  function show(i) {
+    index = (i + slides.length) % slides.length;
+    origin = performance.now();
+    face4 = '';
+    slides.forEach((s, n) => {
+      const on = n === index;
+      s.classList.toggle('on', on);
+      s.setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
+    dotBtns.forEach((b, n) => {
+      b.classList.toggle('on', n === index);
+      b.setAttribute('aria-current', n === index ? 'true' : 'false');
+    });
+    $('#hudIdx').textContent = String(index + 1).padStart(2, '0') + ' / ' + String(slides.length).padStart(2, '0');
+  }
+
+  function applyLang(next) {
+    lang = next === 'en' ? 'en' : 'de';
+    const pack = copy[lang];
+    document.documentElement.lang = lang;
+    document.title = pack.docTitle;
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      const v = pack[el.dataset.i18n];
+      if (v) el.textContent = v;
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach((el) => {
+      const v = pack[el.dataset.i18nHtml];
+      if (v) el.innerHTML = v;
+    });
+    $('#prev').setAttribute('aria-label', pack.prev);
+    $('#next').setAttribute('aria-label', pack.next);
+    document.querySelector('nav.nav').setAttribute('aria-label', pack.nav);
+    dotBtns.forEach((b, i) => b.setAttribute('aria-label', pack.goto + ' ' + (i + 1)));
+  }
+
+  function cut(full, into, ms) {
+    if (reduced) return full.length;
+    return Math.max(0, Math.min(full.length, Math.floor(full.length * Math.min(1, into / ms))));
+  }
+  function say(id, caretId, full, n, doneHide) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = full.slice(0, n);
+    const c = document.getElementById(caretId);
+    if (c) c.classList.toggle('off', doneHide);
+  }
+
+  function paint(now) {
+    const pack = copy[lang];
+    const e = Math.max(0, now - origin);
+    const steps = reduced ? 3 : Math.min(3, Math.floor(e / BEAT));
+    document.querySelectorAll('#notes2 .note').forEach((n, i) => n.classList.toggle('in', i < steps));
+    $('#now2').textContent = pack.s2now[steps];
+
+    const b3 = reduced ? 2 : Math.floor(e / BEAT) % 3;
+    const into3 = reduced ? BEAT : e % BEAT;
+    const tools = $('#tools');
+    const face3 = ['cursor', 'claude', 'oc'][b3];
+    if (tools.dataset.face !== face3) tools.dataset.face = face3;
+    const n3 = cut(pack.sentence, into3, 1300);
+    const done3 = n3 === pack.sentence.length;
+    say('say3', 'caret3', pack.sentence, n3, done3);
+    say('say3b', 'caret3b', pack.sentence, n3, done3);
+    say('say3c', 'caret3c', pack.sentence, n3, done3);
+    ['follow3', 'follow3b', 'follow3c'].forEach((id) => document.getElementById(id).classList.toggle('show', done3));
+    $('#now3').textContent = pack.s3now[b3];
+
+    const faces4 = ['cursor', 'pc', 'vc', 'dc'];
+    const b4 = reduced ? 3 : Math.floor(e / BEAT) % 4;
+    const stage = $('#stage4');
+    if (face4 !== faces4[b4]) {
+      face4 = faces4[b4];
+      stage.classList.remove('run');
+      stage.dataset.face = face4;
+      void stage.offsetWidth;
+      stage.classList.add('run');
+    }
+    $('#call4').textContent = pack.call;
+    $('#now4').textContent = pack.s4now[b4];
+
+    const b5 = reduced ? 2 : Math.floor(e / BEAT) % 3;
+    const into5 = reduced ? BEAT : e % BEAT;
+    const scene = $('#scene5');
+    scene.classList.toggle('near', b5 < 2);
+    scene.classList.toggle('far', b5 >= 2);
+    const n5 = b5 === 0 ? 0 : cut(pack.fix, b5 === 1 ? into5 : BEAT, 1100);
+    say('say5', 'caret5', pack.fix, n5, b5 !== 1 || n5 === pack.fix.length);
+    $('#now5').textContent = pack.s5now[b5];
+    requestAnimationFrame(paint);
+  }
+
+  $('#prev').addEventListener('click', () => show(index - 1));
+  $('#next').addEventListener('click', () => show(index + 1));
+  document.addEventListener('keydown', (e) => {
+    if (e.target.closest('button')) return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); show(index + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(index - 1); }
+  });
+  let swipeX = null;
+  $('#deck').addEventListener('pointerdown', (e) => { if (e.target.closest('button')) return; swipeX = e.clientX; });
+  $('#deck').addEventListener('pointerup', (e) => {
+    if (swipeX == null) return;
+    const dx = e.clientX - swipeX;
+    swipeX = null;
+    if (Math.abs(dx) > 56) show(index + (dx < 0 ? 1 : -1));
+  });
+
+  try { lang = localStorage.getItem('konzept-lang') === 'en' ? 'en' : 'de'; } catch (err) {}
+  applyLang(lang);
+  show(0);
+  requestAnimationFrame(paint);
+})();
+</script>
+<nav class="legal-links"><a id="lg-imp" data-p="../" href="../impressum.html" style="color:inherit">Impressum</a> <a id="lg-priv" href="../datenschutz.html" style="color:inherit">Datenschutz</a></nav><script>(function(){function L(){var l="de";try{l=localStorage.getItem("konzept-lang")==="en"?"en":"de"}catch(e){}var a=document.getElementById("lg-imp"),b=document.getElementById("lg-priv"),p=a.dataset.p;if(l==="en"){a.href=p+"legal-notice.html";a.textContent="Legal Notice";b.href=p+"privacy.html";b.textContent="Privacy Policy"}else{a.href=p+"impressum.html";a.textContent="Impressum";b.href=p+"datenschutz.html";b.textContent="Datenschutz"}}L();document.addEventListener("click",function(){setTimeout(L,0)},true)})();</script>
+</body>
+</html>

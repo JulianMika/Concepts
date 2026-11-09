@@ -4,42 +4,146 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Concepts</title>
-<meta name="description" content="Konzepte von Julian Geiss – Die reine Innovation: KI-Automatisierung.">
+<meta name="description" content="Konzepte von Julian Geiss – Die reine Innovation: KI-Automatisierung. KI-gestützte menschliche Kunst.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Concepts">
-<meta property="og:description" content="Konzepte von Julian Geiss – Die reine Innovation: KI-Automatisierung.">
+<meta property="og:description" content="Konzepte von Julian Geiss – Die reine Innovation: KI-Automatisierung. KI-gestützte menschliche Kunst.">
 <meta property="og:url" content="https://julianmika.github.io/Concepts/">
 <meta property="og:image" content="https://julianmika.github.io/Concepts/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Concepts">
-<meta name="twitter:description" content="Konzepte von Julian Geiss – Die reine Innovation: KI-Automatisierung.">
+<meta name="twitter:description" content="Konzepte von Julian Geiss – Die reine Innovation: KI-Automatisierung. KI-gestützte menschliche Kunst.">
 <meta name="twitter:image" content="https://julianmika.github.io/Concepts/og-image.png">
+<link href="fonts/fonts.css" rel="stylesheet">
 <style>
-  :root{--ink:#102033;--muted:#3a5168;--paper:#eef7fb;--line:#9fd0de;--mag:#e0126a}
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    min-height:100svh;background:var(--paper);color:var(--ink);
-    font-family:"Segoe UI","Helvetica Neue",system-ui,sans-serif;
-    padding:18vh 8vw 12vh;
+  html{color-scheme:dark}
+  :root{
+    --ink:#e8f6fb;--muted:#a9c0ce;--paper:#07141c;--line:#245064;
+    --card:#102430;--teal:#4fd4ea;--mag:#ff4d8d;--cyan:#7eebf7;
+    --head:"Chakra Petch","Segoe UI",system-ui,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
   }
-  h1{font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--muted);margin-bottom:2.5rem}
-  ul{list-style:none;max-width:36rem}
-  a{color:inherit;text-decoration:none;display:block;padding:1.1rem 0;border-top:1px solid var(--line)}
-  li:last-child a{border-bottom:1px solid var(--line)}
-  a strong{display:block;font-size:clamp(1.6rem,3vw,2rem);font-weight:650;letter-spacing:-.02em}
-  a span{display:block;margin-top:.35rem;color:var(--muted)}
-  a:hover strong{color:var(--mag)}
-  .lang{position:fixed;top:22px;right:8vw;display:flex}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%;background:var(--paper);color:var(--ink)}
+  body{
+    min-height:100svh;font-family:var(--head);-webkit-font-smoothing:antialiased;
+    display:grid;place-items:center;padding:12vh 6vw 11vh;overflow:hidden;
+  }
+  body::before{
+    content:"";position:fixed;inset:-10%;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(880px 520px at 8% 0%, rgba(0,194,216,.34) 0%, transparent 62%),
+      radial-gradient(720px 480px at 100% 100%, rgba(224,18,106,.26) 0%, transparent 58%),
+      linear-gradient(165deg,#07141c,#0c1c28 55%,#140e16);
+    animation:drift 28s ease-in-out infinite alternate;
+  }
+  body::after{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:
+      linear-gradient(rgba(0,151,178,.16) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,151,178,.16) 1px, transparent 1px),
+      linear-gradient(rgba(224,18,106,.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(224,18,106,.08) 1px, transparent 1px);
+    background-size:48px 48px,48px 48px,144px 144px,144px 144px;
+    animation:drift 36s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes drift{from{transform:translate3d(0,0,0)}to{transform:translate3d(-2.2%,-1.4%,0)}}
+  .lang{position:fixed;z-index:30;top:22px;right:6vw;display:flex}
   .lang button{
-    font:inherit;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--muted);background:transparent;border:1px solid var(--line);
+    font:inherit;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);background:rgba(7,20,28,.92);border:1px solid var(--line);
     padding:6px 10px;cursor:pointer;
   }
-  .lang button + button{margin-left:-1px}
+  .lang button+button{margin-left:-1px}
   .lang button.on{position:relative;z-index:1;color:var(--ink);border-color:var(--ink)}
-  .lang button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+  .lang button:focus-visible,.topics a:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
+  .home{
+    position:relative;z-index:1;width:min(1080px,100%);
+    display:grid;grid-template-columns:minmax(280px,1fr) minmax(280px,520px);
+    gap:6vw;align-items:center;
+  }
+  h1{
+    font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    font-weight:500;color:var(--teal);margin-bottom:1.4rem;
+  }
+  h1::before{content:"// ";color:var(--mag)}
+  .topics{list-style:none}
+  .topics a{
+    display:grid;grid-template-columns:auto 1fr;column-gap:16px;row-gap:4px;
+    padding:1.15rem 0;border-top:1px solid var(--line);color:inherit;text-decoration:none;
+  }
+  .topics li:last-child a{border-bottom:1px solid var(--line)}
+  .topics em{
+    grid-row:1 / span 2;align-self:center;font-family:var(--mono);font-style:normal;
+    font-size:12px;letter-spacing:.16em;color:var(--teal);
+  }
+  .topics strong{font-size:clamp(1.7rem,3vw,2.45rem);font-weight:700;letter-spacing:-.03em;line-height:1.02}
+  .topics span{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .topics a:hover strong,.topics a:hover em{color:var(--mag)}
+  .atom{
+    width:min(100%,52vh,520px);aspect-ratio:1;margin-inline:auto;position:relative;
+    perspective:680px;transform-style:preserve-3d;
+  }
+  .atom::before{
+    content:"";position:absolute;inset:16%;border-radius:50%;pointer-events:none;
+    background:radial-gradient(circle,rgba(79,212,234,.38),rgba(255,77,141,.1) 42%,transparent 70%);
+    filter:blur(10px);
+  }
+  .spin{
+    position:absolute;inset:0;transform-style:preserve-3d;
+    animation:tumble 12s ease-in-out infinite alternate;
+  }
+  @keyframes tumble{
+    from{transform:rotateX(-22deg) rotateY(-36deg)}
+    to{transform:rotateX(26deg) rotateY(42deg)}
+  }
+  .ring{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateY(var(--y)) rotateX(var(--x))}
+  .track{
+    container-type:size;position:absolute;left:11%;top:11%;width:78%;height:78%;
+    transform-style:preserve-3d;
+    animation:ride var(--dur) linear infinite;animation-direction:var(--dir,normal);
+  }
+  @keyframes ride{to{transform:rotateZ(360deg)}}
+  .track i,.track b{
+    position:absolute;left:50%;top:-2px;width:4px;height:4px;margin-left:-2px;border-radius:50%;
+    background:var(--c);transform-origin:2px calc(50cqb + 2px);transform:rotate(var(--a));
+  }
+  .track i{opacity:.72;box-shadow:0 0 6px var(--c)}
+  .track b{
+    top:-8px;width:16px;height:16px;margin-left:-8px;transform-origin:8px calc(50cqb + 8px);
+    background:radial-gradient(circle at 32% 30%,#fff,var(--c) 42%,#041018);box-shadow:0 0 16px var(--c);
+  }
+  .r1{--x:74deg;--y:0deg;--dur:9s;--c:#4fd4ea}
+  .r2{--x:74deg;--y:60deg;--dur:13s;--dir:reverse;--c:#ff4d8d}
+  .r3{--x:74deg;--y:120deg;--dur:17s;--c:#7eebf7}
+  .core{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;animation:coreturn 22s linear infinite}
+  @keyframes coreturn{to{transform:rotateY(360deg)}}
+  .core span{
+    position:absolute;width:38px;height:38px;margin:-19px;border-radius:50%;
+    transform:translate3d(var(--px),var(--py),var(--pz));
+  }
+  .core .n1{--px:-20px;--py:-12px;--pz:26px;background:radial-gradient(circle at 34% 30%,#fff,#4fd4ea 40%,#046072)}
+  .core .n2{--px:22px;--py:-8px;--pz:-18px;background:radial-gradient(circle at 34% 30%,#fff,#ff4d8d 44%,#7a123f)}
+  .core .n3{--px:-4px;--py:20px;--pz:6px;background:radial-gradient(circle at 34% 30%,#fff,#7eebf7 40%,#08586c)}
+  footer{
+    position:fixed;z-index:5;left:0;right:0;bottom:16px;text-align:center;
+    font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+  }
+  footer a{color:var(--muted);text-decoration:none;margin:0 .45rem}
+  footer a:hover{color:var(--ink)}
+  @media (max-width:860px){
+    body{overflow:auto;padding:84px 20px 88px;place-items:start center}
+    .home{grid-template-columns:1fr;gap:28px}
+    .atom{order:-1;width:min(100%,68vw,380px)}
+    .lang{right:16px;top:max(12px,env(safe-area-inset-top))}
+    footer{bottom:max(12px,env(safe-area-inset-bottom))}
+  }
+  @media (prefers-reduced-motion:reduce){
+    body::before,body::after,.spin,.track,.core{animation:none}
+    .spin{transform:rotateX(18deg) rotateY(-32deg)}
+  }
 </style>
 </head>
 <body>
@@ -47,26 +151,53 @@
     <button type="button" data-lang="en" aria-pressed="false">EN</button>
     <button type="button" data-lang="de" aria-pressed="true">DE</button>
   </div>
-  <h1>Concepts</h1>
-  <ul>
-    <li>
-      <a href="die-reine-innovation/index.html">
-        <strong id="title">Die reine Innovation</strong>
-        <span id="deck">KI-Automatisierung</span>
-      </a>
-    </li>
-  </ul>
+  <main class="home">
+    <div>
+      <h1>Concepts</h1>
+      <ul class="topics">
+        <li>
+          <a href="die-reine-innovation/index.html">
+            <em>01</em>
+            <strong data-i18n="t1">Die reine Innovation</strong>
+            <span data-i18n="d1">KI-Automatisierung</span>
+          </a>
+        </li>
+        <li>
+          <a href="ai-powered-human-art/index.html">
+            <em>02</em>
+            <strong data-i18n="t2">KI-gestützte menschliche Kunst</strong>
+            <span data-i18n="d2">Konzept, dann Handwerk</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="atom" aria-hidden="true">
+      <div class="spin">
+        <div class="ring r1"></div>
+        <div class="ring r2"></div>
+        <div class="ring r3"></div>
+        <div class="core"><span class="n1"></span><span class="n2"></span><span class="n3"></span></div>
+      </div>
+    </div>
+  </main>
 <script>
   var copy = {
-    de: { title: 'Die reine Innovation', deck: 'KI-Automatisierung' },
-    en: { title: 'The pure innovation', deck: 'AI automation' }
+    de: {
+      t1: 'Die reine Innovation', d1: 'KI-Automatisierung',
+      t2: 'KI-gestützte menschliche Kunst', d2: 'Konzept, dann Handwerk'
+    },
+    en: {
+      t1: 'The pure innovation', d1: 'AI automation',
+      t2: 'AI powered human art', d2: 'Concept, then craft'
+    }
   };
   function apply(next) {
     var lang = next === 'en' ? 'en' : 'de';
     var pack = copy[lang];
     document.documentElement.lang = lang;
-    document.getElementById('title').textContent = pack.title;
-    document.getElementById('deck').textContent = pack.deck;
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      if (pack[el.dataset.i18n]) el.textContent = pack[el.dataset.i18n];
+    });
     document.querySelectorAll('.lang button').forEach(function (b) {
       var on = b.dataset.lang === lang;
       b.classList.toggle('on', on);
@@ -80,7 +211,20 @@
   var saved = 'de';
   try { saved = localStorage.getItem('konzept-lang') === 'en' ? 'en' : 'de'; } catch (err) {}
   apply(saved);
+  document.querySelectorAll('.ring').forEach(function (ring) {
+    var track = document.createElement('div');
+    track.className = 'track';
+    for (var i = 0; i < 48; i++) {
+      var dot = document.createElement('i');
+      dot.style.setProperty('--a', (i * 7.5) + 'deg');
+      track.appendChild(dot);
+    }
+    var ball = document.createElement('b');
+    ball.style.setProperty('--a', '0deg');
+    track.appendChild(ball);
+    ring.appendChild(track);
+  });
 </script>
-<footer style="margin:3rem auto 1.5rem;text-align:center;font-size:.8rem;opacity:.75"><a id="lg-imp" data-p="" href="impressum.html" style="color:inherit">Impressum</a> <a id="lg-priv" href="datenschutz.html" style="color:inherit">Datenschutz</a></footer><script>(function(){function L(){var l="de";try{l=localStorage.getItem("konzept-lang")==="en"?"en":"de"}catch(e){}var a=document.getElementById("lg-imp"),b=document.getElementById("lg-priv"),p=a.dataset.p;if(l==="en"){a.href=p+"legal-notice.html";a.textContent="Legal Notice";b.href=p+"privacy.html";b.textContent="Privacy Policy"}else{a.href=p+"impressum.html";a.textContent="Impressum";b.href=p+"datenschutz.html";b.textContent="Datenschutz"}}L();document.addEventListener("click",function(){setTimeout(L,0)},true)})();</script>
+<footer><a id="lg-imp" data-p="" href="impressum.html">Impressum</a> <a id="lg-priv" href="datenschutz.html">Datenschutz</a></footer><script>(function(){function L(){var l="de";try{l=localStorage.getItem("konzept-lang")==="en"?"en":"de"}catch(e){}var a=document.getElementById("lg-imp"),b=document.getElementById("lg-priv"),p=a.dataset.p;if(l==="en"){a.href=p+"legal-notice.html";a.textContent="Legal Notice";b.href=p+"privacy.html";b.textContent="Privacy Policy"}else{a.href=p+"impressum.html";a.textContent="Impressum";b.href=p+"datenschutz.html";b.textContent="Datenschutz"}}L();document.addEventListener("click",function(){setTimeout(L,0)},true)})();</script>
 </body>
 </html>
